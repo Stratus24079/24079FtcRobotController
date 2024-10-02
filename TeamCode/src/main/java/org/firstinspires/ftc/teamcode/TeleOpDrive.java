@@ -47,7 +47,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name="Tele Op", group="Linear OpMode")
 
-public class TeleOp extends LinearOpMode {
+public class TeleOpDrive extends LinearOpMode {
 
     RobotHardware robot;
 
