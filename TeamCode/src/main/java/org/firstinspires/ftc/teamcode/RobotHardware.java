@@ -13,6 +13,10 @@ public class RobotHardware {
     public DcMotor leftFrontDrive = null;
     public DcMotor rightBackDrive = null;
     public DcMotor leftBackDrive = null;
+    public DcMotor leftLift = null;
+    public DcMotor rightLift = null;
+    public DcMotor leftExtension = null;
+    public DcMotor rightExtension = null;
 
     public RobotHardware(LinearOpMode opmode) {
         myOpMode = opmode;
@@ -24,11 +28,22 @@ public class RobotHardware {
         rightFrontDrive = myOpMode.hardwareMap.get(DcMotor.class, "rightFrontDrive");
         leftBackDrive = myOpMode.hardwareMap.get(DcMotor.class, "leftBackDrive");
         rightBackDrive = myOpMode.hardwareMap.get(DcMotor.class, "rightBackDrive");
+        leftLift = myOpMode.hardwareMap.get(DcMotor.class, "leftLift");
+        rightLift = myOpMode.hardwareMap.get(DcMotor.class, "rightLift");
+        leftExtension = myOpMode.hardwareMap.get(DcMotor.class, "leftExtension");
+        rightExtension = myOpMode.hardwareMap.get(DcMotor.class, "rightExtension");
 
-        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftLift.setDirection(DcMotor.Direction.FORWARD);
+        rightLift.setDirection(DcMotor.Direction.REVERSE);
+
+        leftLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         myOpMode.telemetry.addData(">", "Initialized");
     }
@@ -62,10 +77,18 @@ public class RobotHardware {
             RIGHT_BACK_POWER /= max;
         }
 
-        leftFrontDrive.setPower(LEFT_FRONT_POWER*1.1);
-        rightFrontDrive.setPower(RIGHT_FRONT_POWER*1.1);
-        leftBackDrive.setPower(LEFT_BACK_POWER*1.1);
-        rightBackDrive.setPower(RIGHT_BACK_POWER*1.1);
+        leftFrontDrive.setPower(LEFT_FRONT_POWER*1.3);
+        rightFrontDrive.setPower(RIGHT_FRONT_POWER*1.3);
+        leftBackDrive.setPower(LEFT_BACK_POWER*1.3);
+        rightBackDrive.setPower(RIGHT_BACK_POWER*1.3);
+
+        // Linear slides
+        rightLift.setPower(myOpMode.gamepad2.right_trigger-myOpMode.gamepad2.left_trigger);
+        leftLift.setPower(myOpMode.gamepad2.right_trigger-myOpMode.gamepad2.left_trigger);
+
+        // Horizontal extension
+        rightExtension.setPower(myOpMode.gamepad1.right_trigger-myOpMode.gamepad1.left_trigger);
+        leftExtension.setPower(myOpMode.gamepad1.right_trigger-myOpMode.gamepad1.left_trigger);
     }
 
     public void checkTelemetry(){
