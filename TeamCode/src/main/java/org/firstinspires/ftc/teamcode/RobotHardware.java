@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -33,17 +34,23 @@ public class RobotHardware {
         leftExtension = myOpMode.hardwareMap.get(DcMotor.class, "leftExtension");
         rightExtension = myOpMode.hardwareMap.get(DcMotor.class, "rightExtension");
 
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftLift.setDirection(DcMotor.Direction.FORWARD);
-        rightLift.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftLift.setDirection(DcMotor.Direction.REVERSE);
+        rightLift.setDirection(DcMotor.Direction.FORWARD);
+        leftExtension.setDirection(DcMotor.Direction.FORWARD);
+        rightExtension.setDirection(DcMotor.Direction.REVERSE);
 
         leftLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftExtension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightExtension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftExtension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightExtension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         myOpMode.telemetry.addData(">", "Initialized");
     }
@@ -54,7 +61,7 @@ public class RobotHardware {
 
         // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
         double axial = -myOpMode.gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
-        double lateral = myOpMode.gamepad1.left_stick_x;
+        double lateral = -myOpMode.gamepad1.left_stick_x;
         double yaw = myOpMode.gamepad1.right_stick_x;
 
         // Combine the joystick requests for each axis-motion to determine each wheel's power.
@@ -83,8 +90,10 @@ public class RobotHardware {
         rightBackDrive.setPower(RIGHT_BACK_POWER*1.3);
 
         // Linear slides
-        rightLift.setPower(myOpMode.gamepad2.right_trigger-myOpMode.gamepad2.left_trigger);
-        leftLift.setPower(myOpMode.gamepad2.right_trigger-myOpMode.gamepad2.left_trigger);
+        if (leftLift.getCurrentPosition() >= 0 && rightLift.getCurrentPosition() >= 0) {
+            rightLift.setPower(myOpMode.gamepad2.right_trigger - myOpMode.gamepad2.left_trigger);
+            leftLift.setPower(myOpMode.gamepad2.right_trigger - myOpMode.gamepad2.left_trigger);
+        }
 
         // Horizontal extension
         rightExtension.setPower(myOpMode.gamepad1.right_trigger-myOpMode.gamepad1.left_trigger);
@@ -96,6 +105,8 @@ public class RobotHardware {
         myOpMode.telemetry.addData("LeftBack at", leftBackDrive.getCurrentPosition());
         myOpMode.telemetry.addData("RightFront at", rightFrontDrive.getCurrentPosition());
         myOpMode.telemetry.addData("RightBack at", rightBackDrive.getCurrentPosition());
+        myOpMode.telemetry.addData("LeftLift at", leftLift.getCurrentPosition());
+        myOpMode.telemetry.addData("RightLift at", rightLift.getCurrentPosition());
         myOpMode.telemetry.update();
     }
 }

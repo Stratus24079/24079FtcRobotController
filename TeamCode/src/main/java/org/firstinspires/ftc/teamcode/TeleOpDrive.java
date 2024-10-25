@@ -62,9 +62,9 @@ public class TeleOpDrive extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            // Insert whatever teleop code you're using
             // Call the robot's teleOp function
             robot.teleOp();
+            robot.checkTelemetry();
         }
 
     }
