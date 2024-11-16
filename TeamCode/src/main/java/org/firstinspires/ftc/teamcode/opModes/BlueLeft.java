@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 FIRST. All rights reserved.
+/* Copyright (c) 2019 FIRST. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted (subject to the limitations in the disclaimer below) provided that
@@ -27,45 +27,56 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opModes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-/*
- * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
- * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
- * of the FTC Driver Station. When a selection is made from the menu, the corresponding OpMode
- * class is instantiated on the Robot Controller and executed.
- *
- * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
- * It includes all the skeletal structure that all linear OpModes contain.
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
- */
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
-@TeleOp(name="Tele Op", group="Linear OpMode")
+@Autonomous(name = "BlueLeft", group = "Concept")
 
-public class TeleOpDrive extends LinearOpMode {
+public class BlueLeft extends LinearOpMode {
+    private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
 
+    // Add instance of RobotHardware
     RobotHardware robot;
 
-    @Override
-    public void runOpMode() {
-        robot = new RobotHardware(this);
+    // Create a runtime object so we can time loops
+    ElapsedTime runtime = new ElapsedTime(0);
 
+    @Override
+    public void runOpMode() throws InterruptedException {
+
+        // Initialize robot object with reference to this opMode
+        // We can now call all the functions from the RobotHardware Class
+        robot = new RobotHardware(this);
+        // We need to initialize the robot hardware
         robot.init();
+
+        // Wait for the DS start button to be touched.
+        telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
+        telemetry.addData(">", "Touch Play to start OpMode");
+        telemetry.update();
+
+        robot.clawJoint.setPosition(robot.CLAW_JOINT);
+        robot.claw.setPosition(robot.CLAW_OPEN);
+        robot.intakeJoint.setPosition(robot.INTAKE_UP);
+        robot.pivot.setPosition(robot.PIVOT_DOWN);
 
         waitForStart();
 
-        // run until the end of the match (driver presses STOP)
-        while (opModeIsActive()) {
+        if (opModeIsActive()) {
 
-            // Call the robot's teleOp function
-            robot.teleOp();
-            robot.checkTelemetry();
+            robot.autoStrafe(0.5, -23, 5);
+            robot.autoStrafe(0.5, 23, 5);
+            robot.encoderDrive(0.5, -45, 5);
+            robot.turnCW(0.5, 90);
+            robot.encoderDrive(0.5, -13, 5);;
+            robot.pivot.setPosition(robot.PIVOT_UP);
+            sleep(5000);
+
         }
-
-    }
-}
+    }   // end runOpMode()
+}   // end class
