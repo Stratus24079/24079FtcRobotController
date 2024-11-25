@@ -60,11 +60,6 @@ public class BlueRight extends LinearOpMode {
         telemetry.addData(">", "Touch Play to start OpMode");
         telemetry.update();
 
-        robot.clawJoint.setPosition(robot.CLAW_JOINT);
-        robot.claw.setPosition(robot.CLAW_OPEN);
-        robot.intakeJoint.setPosition(robot.INTAKE_UP);
-        robot.pivot.setPosition(robot.PIVOT_DOWN);
-
         waitForStart();
 
         if (opModeIsActive()) {

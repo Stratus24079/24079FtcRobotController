@@ -69,8 +69,8 @@ public class BlueLeft extends LinearOpMode {
 
         if (opModeIsActive()) {
 
-            robot.autoStrafe(0.5, -23, 5);
             robot.autoStrafe(0.5, 23, 5);
+            robot.autoStrafe(0.5, -23, 5);
             robot.encoderDrive(0.5, -45, 5);
             robot.turnCW(0.5, 90);
             robot.encoderDrive(0.5, -13, 5);;

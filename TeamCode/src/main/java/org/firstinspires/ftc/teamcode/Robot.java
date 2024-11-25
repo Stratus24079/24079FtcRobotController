@@ -12,6 +12,7 @@ public class Robot {
     public Drivetrain drivetrain;
     public Scoring scoring;
     public Lift lift;
+    public Intake intake;
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
     public Robot(LinearOpMode opmode) {
@@ -22,10 +23,12 @@ public class Robot {
         drivetrain = new Drivetrain(myOpMode);
         scoring = new Scoring(myOpMode);
         lift = new Lift(myOpMode);
+        intake = new Intake(myOpMode);
 
         drivetrain.init();
         scoring.init();
         lift.init();
+        intake.init();
 
         myOpMode.telemetry.addData(">", "Hardware Initialized");
         myOpMode.telemetry.update();
@@ -35,6 +38,7 @@ public class Robot {
         drivetrain.teleOp();
         lift.teleOp();
         scoring.teleOp();
+        intake.teleOp();
     }
 
     public void deliver() {

@@ -1,7 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
 public class Lift {
@@ -16,12 +21,14 @@ public class Lift {
     PIDController rightLiftPID;
 
     //touch sensor
-    public TouchSensor touch = null;
+    //public TouchSensor touch = null;
 
     //lift constants
     public static final double LIFT_KP = 0.01;
     public static final double LIFT_KI = 0;
     public static final double LIFT_KD = 0;
+    public static final int LIFT_HIGH = 2400;
+    public static final int LIFT_LOW = 1000;
 
     //if the subsystem has explicit states, it can be helpful to use an enum to define them
     public enum LiftMode {
@@ -43,8 +50,8 @@ public class Lift {
         leftLiftPID.maxOut = 0.95;
         rightLiftPID.maxOut = 0.95;
 
-        rightLift = myOpMode.hardwareMap.get(DcMotor.class, "liftRight");
-        leftLift = myOpMode.hardwareMap.get(DcMotor.class, "liftLeft");
+        rightLift = myOpMode.hardwareMap.get(DcMotor.class, "rightLift");
+        leftLift = myOpMode.hardwareMap.get(DcMotor.class, "leftLift");
 
         //touch = myOpMode.hardwareMap.get(TouchSensor.class, "touch");
 
@@ -64,15 +71,15 @@ public class Lift {
 
     public void teleOp() {
         // gamepad control specific to lift
-        if (Math.abs(myOpMode.gamepad1.right_trigger) > 0.3 || Math.abs(myOpMode.gamepad1.left_trigger) > 0.3) {
+        if (Math.abs(myOpMode.gamepad1.right_trigger) > 0 || Math.abs(myOpMode.gamepad1.left_trigger) > 0) {
             liftMode = LiftMode.MANUAL;
-        } else if (myOpMode.gamepad1.dpad_up) {
-            liftMode = LiftMode.HIGH;
-        } else if (myOpMode.gamepad1.dpad_down) {
-            liftMode = LiftMode.LOW;
-        }
+        } //else if (myOpMode.gamepad1.dpad_up) {
+            //liftMode = LiftMode.HIGH;
+        //} else if (myOpMode.gamepad1.dpad_down) {
+        //    liftMode = LiftMode.LOW;
+        //}
 
-        myOpMode.telemetry.addData("touch", "Pressed: " + touch.isPressed());
+        //myOpMode.telemetry.addData("touch", "Pressed: " + touch.isPressed());
         //if (touch.isPressed()) {
         //    leftLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //    rightLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -98,15 +105,14 @@ public class Lift {
                 //rightLift.setPower(0);
             //}
         } else if (liftMode == LiftMode.HIGH) {
-            liftToPositionPIDClass(3700);
+            liftToPositionPIDClass(LIFT_HIGH);
         } else if (liftMode == LiftMode.LOW) {
-            liftToPositionPIDClass(1409);
+            liftToPositionPIDClass(LIFT_LOW);
         } else if (liftMode == LiftMode.GROUND) {
-            resetLift(-0.8);
+            resetLift(0.8);
         }
     }
 
-    // functions specific to lift
     public void liftToPositionPIDClass(double targetPosition) {
         double outLeft = leftLiftPID.calculate(targetPosition, leftLift.getCurrentPosition());
         double outRight = rightLiftPID.calculate(targetPosition, rightLift.getCurrentPosition());
@@ -121,6 +127,8 @@ public class Lift {
     public void resetLift(double speed) {
         leftLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        liftToPositionPIDClass(0);
         //if (touch.isPressed() == false) {
         //    leftLift.setPower(speed);
         //    rightLift.setPower(speed);
@@ -133,5 +141,50 @@ public class Lift {
     public void resetLiftPID() {
         leftLiftPID.reset();
         rightLiftPID.reset();
+    }
+
+    public class LiftHigh implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            double outLeft = leftLiftPID.calculate(-2000, leftLift.getCurrentPosition());
+            double outRight = rightLiftPID.calculate(-2000, rightLift.getCurrentPosition());
+
+            leftLift.setPower(outLeft);
+            rightLift.setPower(outRight);
+
+            if (Math.abs(-2000 - leftLift.getCurrentPosition()) > 10) {
+                return true;
+            } else {
+                leftLift.setPower(0);
+                rightLift.setPower(0);
+                myOpMode.telemetry.addData("Done lift", 0);
+                return false;
+            }
+        }
+    }
+    public Action liftHigh() {
+        return new LiftHigh();
+    }
+
+    public class LiftGround implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            double outLeft = leftLiftPID.calculate(0, leftLift.getCurrentPosition());
+            double outRight = rightLiftPID.calculate(0, rightLift.getCurrentPosition());
+
+            leftLift.setPower(outLeft);
+            rightLift.setPower(outRight);
+
+            if (Math.abs(leftLift.getCurrentPosition()) < -10) {
+                return true;
+            } else {
+                leftLift.setPower(0);
+                rightLift.setPower(0);
+                return false;
+            }
+        }
+    }
+    public Action liftGround() {
+        return new LiftGround();
     }
 }

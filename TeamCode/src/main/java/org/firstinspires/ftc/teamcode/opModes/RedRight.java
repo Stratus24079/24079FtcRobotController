@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
 @Autonomous(name = "RedRight", group = "Concept")
@@ -41,7 +42,7 @@ public class RedRight extends LinearOpMode {
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
 
     // Add instance of RobotHardware
-    RobotHardware robot;
+    Robot robot;
 
     // Create a runtime object so we can time loops
     ElapsedTime runtime = new ElapsedTime(0);
@@ -51,7 +52,7 @@ public class RedRight extends LinearOpMode {
 
         // Initialize robot object with reference to this opMode
         // We can now call all the functions from the RobotHardware Class
-        robot = new RobotHardware(this);
+        robot = new Robot(this);
         // We need to initialize the robot hardware
         robot.init();
 
@@ -60,16 +61,16 @@ public class RedRight extends LinearOpMode {
         telemetry.addData(">", "Touch Play to start OpMode");
         telemetry.update();
 
-        robot.clawJoint.setPosition(robot.CLAW_JOINT);
-        robot.claw.setPosition(robot.CLAW_OPEN);
-        robot.intakeJoint.setPosition(robot.INTAKE_UP);
-        robot.pivot.setPosition(robot.PIVOT_DOWN);
-
         waitForStart();
 
         if (opModeIsActive()) {
 
-            robot.autoStrafe(0.5, 30, 5);
+            robot.drivetrain.encoderDrive(0.5, -25, 5);
+            robot.drivetrain.autoStrafe(0.5, -10, 5);
+            robot.scoring.pivot.setPosition(robot.scoring.PIVOT_UP);
+            robot.scoring.clawJoint.setPosition(robot.scoring.CLAW_JOINT+0.3);
+
+            //robot.autoStrafe(0.5, 30, 5);
 
         }
     }   // end runOpMode()

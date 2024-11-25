@@ -435,7 +435,7 @@ public class RobotHardware {
     }
 
     public void checkTelemetry(){
-        myOpMode.telemetry.addData("LeftFront at", leftFrontDrive.getCurrentPosition());
+        /* myOpMode.telemetry.addData("LeftFront at", leftFrontDrive.getCurrentPosition());
         myOpMode.telemetry.addData("LeftBack at", leftBackDrive.getCurrentPosition());
         myOpMode.telemetry.addData("RightFront at", rightFrontDrive.getCurrentPosition());
         myOpMode.telemetry.addData("RightBack at", rightBackDrive.getCurrentPosition());
@@ -444,6 +444,6 @@ public class RobotHardware {
         myOpMode.telemetry.addData("\nLeftExtension at", leftExtension.getCurrentPosition());
         myOpMode.telemetry.addData("RightExtension at", rightExtension.getCurrentPosition());
         myOpMode.telemetry.addData("\nPivot at", pivot.getPosition());
-        myOpMode.telemetry.update();
+        myOpMode.telemetry.update(); */
     }
 }

@@ -29,54 +29,79 @@
 
 package org.firstinspires.ftc.teamcode.opModes;
 
+import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
+
+import org.firstinspires.ftc.teamcode.Lift;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
-@Autonomous(name = "RedLeft", group = "Concept")
+@Autonomous(name = "RedLeft", group = "Autonomous")
 
 public class RedLeft extends LinearOpMode {
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
 
     // Add instance of RobotHardware
-    RobotHardware robot;
+    Robot robot;
 
     // Create a runtime object so we can time loops
     ElapsedTime runtime = new ElapsedTime(0);
 
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void runOpMode() {
+        // instantiate your MecanumDrive at a particular pose.
+        Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(270));
 
-        // Initialize robot object with reference to this opMode
-        // We can now call all the functions from the RobotHardware Class
-        robot = new RobotHardware(this);
-        // We need to initialize the robot hardware
+        robot = new Robot(this);
         robot.init();
 
-        // Wait for the DS start button to be touched.
-        telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
-        telemetry.addData(">", "Touch Play to start OpMode");
-        telemetry.update();
+        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
-        robot.clawJoint.setPosition(robot.CLAW_JOINT);
-        robot.claw.setPosition(robot.CLAW_OPEN);
-        robot.intakeJoint.setPosition(robot.INTAKE_UP);
-        robot.pivot.setPosition(robot.PIVOT_DOWN);
+        TrajectoryActionBuilder traj1 = drive.actionBuilder(initialPose)
+                .setTangent(0)
+                .splineTo(new Vector2d(-18, 18), Math.toRadians(135));
+
+        TrajectoryActionBuilder traj2 = drive.actionBuilder(initialPose)
+                .setTangent(0)
+                .splineTo(new Vector2d(-16, 48), Math.toRadians(180));
 
         waitForStart();
 
+        if (isStopRequested()) return;
+
+        Action trajectoryActionChosen1;
+        trajectoryActionChosen1 = traj1.build();
+
+        Action action2;
+        action2 = traj2.build();
+
         if (opModeIsActive()) {
+            Actions.runBlocking(
+                    new SequentialAction(
+                            trajectoryActionChosen1
+                    )
+            );
 
-            robot.autoStrafe(0.5, -23, 5);
-            robot.autoStrafe(0.5, 23, 5);
-            robot.encoderDrive(0.5, -45, 5);
-            robot.turnCW(0.5, 90);
-            robot.encoderDrive(0.5, -13, 5);;
-            robot.pivot.setPosition(robot.PIVOT_UP);
-            sleep(5000);
-
+            robot.scoring.pivot.setPosition(robot.scoring.PIVOT_UP);
+            robot.lift.liftToPositionPIDClass(-2000);
+            robot.scoring.claw.setPosition(robot.scoring.CLAW_OPEN);
+            robot.lift.liftToPositionPIDClass(0);
+            robot.scoring.pivot.setPosition(robot.scoring.PIVOT_DOWN);
+            robot.scoring.claw.setPosition(robot.scoring.CLAW_OPEN);
+            robot.drivetrain.turnCCW(0.5, 45);
+            robot.drivetrain.encoderDrive(0.5, 50, 5);
         }
-    }   // end runOpMode()
+    }
 }   // end class
