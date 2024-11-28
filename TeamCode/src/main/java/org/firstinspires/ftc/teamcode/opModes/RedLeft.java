@@ -29,24 +29,18 @@
 
 package org.firstinspires.ftc.teamcode.opModes;
 
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
-import org.firstinspires.ftc.teamcode.Lift;
-import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.RobotHardware;
 
 @Autonomous(name = "RedLeft", group = "Autonomous")
 
@@ -62,46 +56,79 @@ public class RedLeft extends LinearOpMode {
     @Override
     public void runOpMode() {
         // instantiate your MecanumDrive at a particular pose.
-        Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(270));
+        Pose2d initialPose = new Pose2d(-33, -60, Math.toRadians(270));
 
         robot = new Robot(this);
         robot.init();
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
-        TrajectoryActionBuilder traj1 = drive.actionBuilder(initialPose)
-                .setTangent(0)
-                .splineTo(new Vector2d(-18, 18), Math.toRadians(135));
+        TrajectoryActionBuilder trajectory = drive.actionBuilder(initialPose)
+                .strafeToLinearHeading(new Vector2d(-44, -42), Math.toRadians(45)) // Score preload
+                .stopAndAdd(robot.intake.intakeDown())
+                .stopAndAdd(robot.scoring.scoringPos())
+                .stopAndAdd(robot.lift.liftHigh())
+                .stopAndAdd(robot.scoring.resetPos())
+                .stopAndAdd(robot.lift.liftGround())
 
-        TrajectoryActionBuilder traj2 = drive.actionBuilder(initialPose)
-                .setTangent(0)
-                .splineTo(new Vector2d(-16, 48), Math.toRadians(180));
+                .strafeToLinearHeading(new Vector2d(-26, -18), Math.toRadians(180)) // To 1st sample
+                .stopAndAdd(robot.intake.intakeSpinIn())
+                .strafeTo(new Vector2d(-36, -18)) // Forward while intaking
+                .stopAndAdd(robot.intake.intakeStop())
+                .stopAndAdd(robot.intake.intakeUp())
+                .waitSeconds(0.5)
+                .stopAndAdd(robot.intakeSpinOutWithSensor()) // Outtake until color sensor detects in claw
+                .stopAndAdd(robot.intake.intakeDown())
+                .strafeToLinearHeading(new Vector2d(-44, -42), Math.toRadians(45)) // Score 1st sample
+                .stopAndAdd(robot.scoring.scoringPos())
+                .stopAndAdd(robot.lift.liftHigh())
+                .stopAndAdd(robot.scoring.resetPos())
+                .stopAndAdd(robot.lift.liftGround())
+
+                .strafeToLinearHeading(new Vector2d(-40, -17), Math.toRadians(180)) // To 2nd sample
+                .stopAndAdd(robot.intake.intakeSpinIn())
+                .strafeTo(new Vector2d(-46, -17)) // Forward while intaking
+                .stopAndAdd(robot.intake.intakeStop())
+                .stopAndAdd(robot.intake.intakeUp())
+                .waitSeconds(0.5)
+                .stopAndAdd(robot.intakeSpinOutWithSensor()) // Outtake until color sensor detects in claw
+                .stopAndAdd(robot.intake.intakeDown())
+                .strafeToLinearHeading(new Vector2d(-44, -42), Math.toRadians(45)) // Score 2nd sample
+                .stopAndAdd(robot.scoring.scoringPos())
+                .stopAndAdd(robot.lift.liftHigh())
+                .stopAndAdd(robot.scoring.resetPos())
+                .stopAndAdd(robot.lift.liftGround())
+
+                .strafeToLinearHeading(new Vector2d(-50, -16), Math.toRadians(180)) // To 3rd sample
+                .stopAndAdd(robot.intake.intakeSpinIn())
+                .strafeTo(new Vector2d(-56, -16)) // Forward while intaking
+                .stopAndAdd(robot.intake.intakeStop())
+                .stopAndAdd(robot.intake.intakeUp())
+                .waitSeconds(0.5)
+                .stopAndAdd(robot.intakeSpinOutWithSensor()) // Outtake until color sensor detects in claw
+                .stopAndAdd(robot.intake.intakeDown())
+                .strafeToLinearHeading(new Vector2d(-44, -42), Math.toRadians(45)) // Score 3rd sample
+                .stopAndAdd(robot.scoring.scoringPos())
+                .stopAndAdd(robot.lift.liftHigh())
+                .stopAndAdd(robot.scoring.resetPos())
+                .stopAndAdd(robot.lift.liftGround())
+
+                .strafeToLinearHeading(new Vector2d(-20, 0), Math.toRadians(180))
+                .strafeTo(new Vector2d(-14, 0))
+                .stopAndAdd(robot.scoring.scoringPos())
+                .waitSeconds(5);
 
         waitForStart();
 
         if (isStopRequested()) return;
 
-        Action trajectoryActionChosen1;
-        trajectoryActionChosen1 = traj1.build();
-
-        Action action2;
-        action2 = traj2.build();
+        Action trajectoryAction;
+        trajectoryAction = trajectory.build();
 
         if (opModeIsActive()) {
             Actions.runBlocking(
-                    new SequentialAction(
-                            trajectoryActionChosen1
-                    )
+                    trajectoryAction
             );
-
-            robot.scoring.pivot.setPosition(robot.scoring.PIVOT_UP);
-            robot.lift.liftToPositionPIDClass(-2000);
-            robot.scoring.claw.setPosition(robot.scoring.CLAW_OPEN);
-            robot.lift.liftToPositionPIDClass(0);
-            robot.scoring.pivot.setPosition(robot.scoring.PIVOT_DOWN);
-            robot.scoring.claw.setPosition(robot.scoring.CLAW_OPEN);
-            robot.drivetrain.turnCCW(0.5, 45);
-            robot.drivetrain.encoderDrive(0.5, 50, 5);
         }
     }
 }   // end class

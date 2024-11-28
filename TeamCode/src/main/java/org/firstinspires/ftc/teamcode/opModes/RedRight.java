@@ -29,12 +29,17 @@
 
 package org.firstinspires.ftc.teamcode.opModes;
 
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.RobotHardware;
 
 @Autonomous(name = "RedRight", group = "Concept")
 
@@ -49,29 +54,28 @@ public class RedRight extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        // instantiate your MecanumDrive at a particular pose.
+        Pose2d initialPose = new Pose2d(-33, -60, Math.toRadians(270));
 
-        // Initialize robot object with reference to this opMode
-        // We can now call all the functions from the RobotHardware Class
         robot = new Robot(this);
-        // We need to initialize the robot hardware
         robot.init();
 
-        // Wait for the DS start button to be touched.
-        telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
-        telemetry.addData(">", "Touch Play to start OpMode");
-        telemetry.update();
+        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
+
+        TrajectoryActionBuilder trajectory = drive.actionBuilder(initialPose)
+                .waitSeconds(5);
 
         waitForStart();
 
+        if (isStopRequested()) return;
+
+        Action trajectoryAction;
+        trajectoryAction = trajectory.build();
+
         if (opModeIsActive()) {
-
-            robot.drivetrain.encoderDrive(0.5, -25, 5);
-            robot.drivetrain.autoStrafe(0.5, -10, 5);
-            robot.scoring.pivot.setPosition(robot.scoring.PIVOT_UP);
-            robot.scoring.clawJoint.setPosition(robot.scoring.CLAW_JOINT+0.3);
-
-            //robot.autoStrafe(0.5, 30, 5);
-
+            Actions.runBlocking(
+                    trajectoryAction
+            );
         }
     }   // end runOpMode()
 }   // end class

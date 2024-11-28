@@ -33,38 +33,16 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.RobotHardware;
-
 @Autonomous(name = "BlueRight", group = "Concept")
 
 public class BlueRight extends LinearOpMode {
-    private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
-
-    // Add instance of RobotHardware
-    RobotHardware robot;
-
-    // Create a runtime object so we can time loops
-    ElapsedTime runtime = new ElapsedTime(0);
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        // Initialize robot object with reference to this opMode
-        // We can now call all the functions from the RobotHardware Class
-        robot = new RobotHardware(this);
-        // We need to initialize the robot hardware
-        robot.init();
-
-        // Wait for the DS start button to be touched.
-        telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
-        telemetry.addData(">", "Touch Play to start OpMode");
-        telemetry.update();
-
         waitForStart();
 
         if (opModeIsActive()) {
-
-            robot.autoStrafe(0.5, 30, 5);
 
         }
     }   // end runOpMode()

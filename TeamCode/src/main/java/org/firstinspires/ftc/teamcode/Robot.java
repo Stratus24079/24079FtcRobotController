@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -13,6 +17,7 @@ public class Robot {
     public Scoring scoring;
     public Lift lift;
     public Intake intake;
+    SensorREVColorDistance sensors;
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
     public Robot(LinearOpMode opmode) {
@@ -24,11 +29,13 @@ public class Robot {
         scoring = new Scoring(myOpMode);
         lift = new Lift(myOpMode);
         intake = new Intake(myOpMode);
+        sensors = new SensorREVColorDistance(myOpMode);
 
         drivetrain.init();
         scoring.init();
         lift.init();
         intake.init();
+        sensors.init();
 
         myOpMode.telemetry.addData(">", "Hardware Initialized");
         myOpMode.telemetry.update();
@@ -39,46 +46,27 @@ public class Robot {
         lift.teleOp();
         scoring.teleOp();
         intake.teleOp();
+        //sensors.getColor();
     }
 
-    public void deliver() {
-        myOpMode.sleep(500);
-        scoring.claw.setPosition(scoring.CLAW_OPEN);
-        myOpMode.sleep(250);
-    }
+    public class IntakeSpinOutWithSensor implements Action {
+        ElapsedTime runtime = new ElapsedTime(0);
 
-    public void retrieve() {
-        myOpMode.sleep(250);
-        myOpMode.sleep(500);
-        scoring.claw.setPosition(scoring.CLAW_CLOSED);
-        myOpMode.sleep(250);
-        lift.liftToPositionPIDClass(750);
-        myOpMode.sleep(400); //new one
-    }
-
-    public void toJunctionLeft() {
-        runtime.reset();
-        while (runtime.seconds() < 2.25) {
-            //scoring.extension.setPosition(scoring.EXTENSION_IN);
-            lift.liftToPositionPIDClass(3600);//3300
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            intake.intake.setPosition(0);
+            sensors.getColor();
+            if (sensors.checkColor(sensors.clawSensorColor) == 0) {
+                return true;
+            } else {
+                intake.intake.setPosition(0.5);
+                return false;
+            }
         }
     }
 
-    public void toStackLeft(int liftHeight) {
-        runtime.reset();
-        while (runtime.seconds() < 1.75) {
-            //scoring.extension.setPosition(scoring.EXTENSION_IN);
-            //scoring.pivot.setPosition(scoring.CLAW_UP);
-            lift.liftToPositionPIDClass(liftHeight);
-        }
-    }
-
-    public void toJunctionRight() {
-        runtime.reset();
-        //scoring.pivot.setPosition(scoring.CLAW_HOVER);
-        while (runtime.seconds() < 2.25) {
-            lift.liftToPositionPIDClass(3600);
-        }
+    public Action intakeSpinOutWithSensor() {
+        return new IntakeSpinOutWithSensor();
     }
 
     public void toStackRight(int liftHeight) {
