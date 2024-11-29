@@ -49,14 +49,14 @@ public class Robot {
         //sensors.getColor();
     }
 
-    public class IntakeSpinOutWithSensor implements Action {
+    public class IntakeTransferWithSensor implements Action {
         ElapsedTime runtime = new ElapsedTime(0);
 
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
             intake.intake.setPosition(0);
             sensors.getColor();
-            if (sensors.checkColor(sensors.clawSensorColor) == 0) {
+            if (sensors.checkColorClaw(sensors.clawSensorColor) == 0) {
                 return true;
             } else {
                 intake.intake.setPosition(0.5);
@@ -65,16 +65,23 @@ public class Robot {
         }
     }
 
-    public Action intakeSpinOutWithSensor() {
-        return new IntakeSpinOutWithSensor();
+    public Action intakeTransferWithSensor() {
+        return new IntakeTransferWithSensor();
     }
 
-    public void toStackRight(int liftHeight) {
-        runtime.reset();
-        while (runtime.seconds() < 1.75) {
-            //scoring.extension.setPosition(scoring.EXTENSION_IN);
-            //scoring.pivot.setPosition(scoring.CLAW_UP);
-            lift.liftToPositionPIDClass(liftHeight);
+    public class IntakeSpinOutWithSensor implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            intake.intake.setPosition(0);
+            if (sensors.checkColorIntake(sensors.intakeSensorColor) != 0) {
+                return true;
+            } else {
+                intake.intake.setPosition(0.5);
+                return false;
+            }
         }
+    }
+    public Action intakeSpinOutWithSensor() {
+        return new IntakeSpinOutWithSensor();
     }
 }

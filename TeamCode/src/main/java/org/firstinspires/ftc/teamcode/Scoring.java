@@ -104,8 +104,43 @@ public class Scoring {
             return false;
         }
     }
-    public Action scoringPos() {
-        return new ScoringPos();
+    public Action scoringPos() { return new ScoringPos(); }
+
+    public class GetSpecimen implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            pivot.setPosition(PIVOT_GET_SPECIMEN);
+            claw.setPosition(CLAW_OPEN);
+            clawJoint.setPosition(CLAW_JOINT_GET_SPECIMEN);
+            return false;
+        }
+    }
+    public Action getSpecimen() {
+        return new GetSpecimen();
+    }
+
+    public class SpecimenHigh implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            pivot.setPosition(PIVOT_SPECIMEN_HIGH);
+            claw.setPosition(CLAW_CLOSED);
+            clawJoint.setPosition(CLAW_JOINT_SPECIMEN_HIGH);
+            return false;
+        }
+    }
+    public Action specimenHigh() {
+        return new SpecimenHigh();
+    }
+
+    public class ScoreSpecimen implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            pivot.setPosition(PIVOT_GET_SPECIMEN + 0.2);
+            return false;
+        }
+    }
+    public Action scoreSpecimen() {
+        return new ScoreSpecimen();
     }
 
     public class ResetPos implements Action {
@@ -128,6 +163,17 @@ public class Scoring {
         }
     }
     public Action openClaw() {
-        return new ResetPos();
+        return new OpenClaw();
+    }
+
+    public class CloseClaw implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            claw.setPosition(CLAW_CLOSED);
+            return false;
+        }
+    }
+    public Action closeClaw() {
+        return new CloseClaw();
     }
 }

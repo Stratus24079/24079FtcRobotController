@@ -55,7 +55,7 @@ public class RedRight extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         // instantiate your MecanumDrive at a particular pose.
-        Pose2d initialPose = new Pose2d(-33, -60, Math.toRadians(270));
+        Pose2d initialPose = new Pose2d(10, -60, Math.toRadians(270));
 
         robot = new Robot(this);
         robot.init();
@@ -63,7 +63,58 @@ public class RedRight extends LinearOpMode {
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         TrajectoryActionBuilder trajectory = drive.actionBuilder(initialPose)
-                .waitSeconds(5);
+                .stopAndAdd(robot.scoring.specimenHigh()) // Score preload
+                .stopAndAdd(robot.intake.intakeDown())
+                .strafeToLinearHeading(new Vector2d(10, -30), Math.toRadians(270))
+                .stopAndAdd(robot.scoring.scoreSpecimen())
+                .waitSeconds(0.5)
+                .stopAndAdd(robot.scoring.resetPos())
+
+                .setTangent(270)
+                .splineToLinearHeading(new Pose2d(38, -16, 0), Math.PI / 2) // To 1st sample
+                .stopAndAdd(robot.intake.intakeSpinIn())
+                .strafeTo(new Vector2d(44, -16)) // Intake sample
+                .stopAndAdd(robot.intake.intakeStop())
+                .strafeToLinearHeading(new Vector2d(40, -55), Math.toRadians(315)) // To human player
+                .stopAndAdd(robot.intakeSpinOutWithSensor()) // Outtake
+
+                .strafeToLinearHeading(new Vector2d(54, -17), 0) // To 2nd sample
+                .stopAndAdd(robot.intake.intakeSpinIn())
+                .strafeTo(new Vector2d(58, -17)) // Intake sample
+                .stopAndAdd(robot.intake.intakeStop())
+                .strafeToLinearHeading(new Vector2d(40, -55), Math.toRadians(315)) // To human player
+                .stopAndAdd(robot.intakeSpinOutWithSensor()) // Outtake
+
+                .strafeToLinearHeading(new Vector2d(62, -17), 0) // To 3rd sample
+                .stopAndAdd(robot.intake.intakeSpinIn())
+                .strafeTo(new Vector2d(66, -17)) // Intake sample
+                .stopAndAdd(robot.intake.intakeStop())
+                .strafeToLinearHeading(new Vector2d(40, -55), Math.toRadians(315)) // To human player
+                .stopAndAdd(robot.intakeSpinOutWithSensor())
+
+                .stopAndAdd(robot.scoring.getSpecimen())
+                .strafeToLinearHeading(new Vector2d(40, -45), Math.toRadians(90)) // Get 1st specimen
+                .strafeTo(new Vector2d(40, -50))
+                .stopAndAdd(robot.scoring.closeClaw())
+                .stopAndAdd(robot.scoring.specimenHigh()) // Score 1st sample
+                .strafeToLinearHeading(new Vector2d(10, -30), Math.toRadians(270))
+                .stopAndAdd(robot.scoring.scoreSpecimen())
+
+                .stopAndAdd(robot.scoring.getSpecimen())
+                .strafeToLinearHeading(new Vector2d(40, -45), Math.toRadians(90)) // Get 2nd specimen
+                .strafeTo(new Vector2d(40, -50))
+                .stopAndAdd(robot.scoring.closeClaw())
+                .stopAndAdd(robot.scoring.specimenHigh()) // Score 2nd sample
+                .strafeToLinearHeading(new Vector2d(10, -30), Math.toRadians(270))
+                .stopAndAdd(robot.scoring.scoreSpecimen())
+
+                .stopAndAdd(robot.scoring.getSpecimen())
+                .strafeToLinearHeading(new Vector2d(40, -45), Math.toRadians(90)) // Get 3rd specimen
+                .strafeTo(new Vector2d(40, -50))
+                .stopAndAdd(robot.scoring.closeClaw())
+                .stopAndAdd(robot.scoring.specimenHigh()) // Score 3rd sample
+                .strafeToLinearHeading(new Vector2d(10, -30), Math.toRadians(270))
+                .stopAndAdd(robot.scoring.scoreSpecimen());
 
         waitForStart();
 

@@ -19,6 +19,11 @@ public class Intake {
     public Servo intake = null;
     public Servo intakeJoint = null;
 
+    PIDController extensionPID;
+
+    public static final double EXTENSION_KP = 0.01;
+    public static final double EXTENSION_KI = 0;
+    public static final double EXTENSION_KD = 0;
     public final double INTAKE_DOWN = 0.8;
     public final double INTAKE_UP = 0.1;
 
@@ -29,6 +34,9 @@ public class Intake {
     }
 
     public void init() {
+        extensionPID = new PIDController(EXTENSION_KP, EXTENSION_KI, EXTENSION_KD);
+        extensionPID.maxOut = 0.95;
+
         extension = myOpMode.hardwareMap.get(DcMotor.class, "leftExtension");
         intake = myOpMode.hardwareMap.get(Servo.class, "intake");
         intakeJoint = myOpMode.hardwareMap.get(Servo.class, "intakeJoint");
@@ -79,6 +87,88 @@ public class Intake {
         }
     }
 
+    public class ExtensionOut1 implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            double out = extensionPID.calculate(400, extension.getCurrentPosition());
+
+            extension.setPower(out);
+
+            if (Math.abs(400 - extension.getCurrentPosition()) > 10) {
+                return true;
+            } else {
+                extension.setPower(0);
+                myOpMode.telemetry.addData("Extension out", 0);
+                return false;
+            }
+        }
+    }
+    public Action extensionOut1() {
+        return new ExtensionOut1();
+    }
+
+    public class ExtensionOut2 implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            double out = extensionPID.calculate(1000, extension.getCurrentPosition());
+
+            extension.setPower(out);
+
+            if (Math.abs(1000 - extension.getCurrentPosition()) > 10) {
+                return true;
+            } else {
+                extension.setPower(0);
+                myOpMode.telemetry.addData("Extension out", 0);
+                return false;
+            }
+        }
+    }
+    public Action extensionOut2() {
+        return new ExtensionOut2();
+    }
+
+    public class ExtensionOut3 implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            double out = extensionPID.calculate(1600, extension.getCurrentPosition());
+
+            extension.setPower(out);
+
+            if (Math.abs(1600 - extension.getCurrentPosition()) > 10) {
+                return true;
+            } else {
+                extension.setPower(0);
+                myOpMode.telemetry.addData("Extension out", 0);
+                return false;
+            }
+        }
+    }
+    public Action extensionOut3() {
+        return new ExtensionOut3();
+    }
+
+    public class ExtensionOn implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            extension.setPower(0.5);
+            return false;
+        }
+    }
+    public Action extensionOn() {
+        return new ExtensionOn();
+    }
+
+    public class ExtensionOff implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            extension.setPower(0);
+            return false;
+        }
+    }
+    public Action extensionOff() {
+        return new ExtensionOff();
+    }
+
     public class IntakeUp implements Action {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
@@ -98,7 +188,6 @@ public class Intake {
             return false;
         }
     }
-
     public Action intakeDown() {
         return new IntakeDown();
     }
@@ -110,7 +199,6 @@ public class Intake {
             return false;
         }
     }
-
     public Action intakeSpinIn() {
         return new IntakeSpinIn();
     }
@@ -128,7 +216,6 @@ public class Intake {
             }
         }
     }
-
     public Action intakeSpinOut() {
         return new IntakeSpinOut();
     }
@@ -140,7 +227,6 @@ public class Intake {
             return false;
         }
     }
-
     public Action intakeStop() {
         return new IntakeStop();
     }

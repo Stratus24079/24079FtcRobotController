@@ -77,7 +77,7 @@ public class RedLeft extends LinearOpMode {
                 .stopAndAdd(robot.intake.intakeStop())
                 .stopAndAdd(robot.intake.intakeUp())
                 .waitSeconds(0.5)
-                .stopAndAdd(robot.intakeSpinOutWithSensor()) // Outtake until color sensor detects in claw
+                .stopAndAdd(robot.intakeTransferWithSensor()) // Outtake until color sensor detects in claw
                 .stopAndAdd(robot.intake.intakeDown())
                 .strafeToLinearHeading(new Vector2d(-44, -42), Math.toRadians(45)) // Score 1st sample
                 .stopAndAdd(robot.scoring.scoringPos())
@@ -91,7 +91,7 @@ public class RedLeft extends LinearOpMode {
                 .stopAndAdd(robot.intake.intakeStop())
                 .stopAndAdd(robot.intake.intakeUp())
                 .waitSeconds(0.5)
-                .stopAndAdd(robot.intakeSpinOutWithSensor()) // Outtake until color sensor detects in claw
+                .stopAndAdd(robot.intakeTransferWithSensor()) // Outtake until color sensor detects in claw
                 .stopAndAdd(robot.intake.intakeDown())
                 .strafeToLinearHeading(new Vector2d(-44, -42), Math.toRadians(45)) // Score 2nd sample
                 .stopAndAdd(robot.scoring.scoringPos())
@@ -105,7 +105,7 @@ public class RedLeft extends LinearOpMode {
                 .stopAndAdd(robot.intake.intakeStop())
                 .stopAndAdd(robot.intake.intakeUp())
                 .waitSeconds(0.5)
-                .stopAndAdd(robot.intakeSpinOutWithSensor()) // Outtake until color sensor detects in claw
+                .stopAndAdd(robot.intakeTransferWithSensor()) // Outtake until color sensor detects in claw
                 .stopAndAdd(robot.intake.intakeDown())
                 .strafeToLinearHeading(new Vector2d(-44, -42), Math.toRadians(45)) // Score 3rd sample
                 .stopAndAdd(robot.scoring.scoringPos())

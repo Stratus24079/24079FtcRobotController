@@ -20,17 +20,14 @@ public class Lift {
     PIDController leftLiftPID;
     PIDController rightLiftPID;
 
-    //touch sensor
-    //public TouchSensor touch = null;
-
-    //lift constants
+    // lift constants
     public static final double LIFT_KP = 0.01;
     public static final double LIFT_KI = 0;
     public static final double LIFT_KD = 0;
     public static final int LIFT_HIGH = 2200;
     public static final int LIFT_LOW = 1000;
 
-    //if the subsystem has explicit states, it can be helpful to use an enum to define them
+    // if the subsystem has explicit states, it can be helpful to use an enum to define them
     public enum LiftMode {
         MANUAL,
         HIGH,
@@ -52,8 +49,6 @@ public class Lift {
 
         rightLift = myOpMode.hardwareMap.get(DcMotor.class, "rightLift");
         leftLift = myOpMode.hardwareMap.get(DcMotor.class, "leftLift");
-
-        //touch = myOpMode.hardwareMap.get(TouchSensor.class, "touch");
 
         leftLift.setDirection(DcMotor.Direction.FORWARD);
         rightLift.setDirection(DcMotor.Direction.REVERSE);

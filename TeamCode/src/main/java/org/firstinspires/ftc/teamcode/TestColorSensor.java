@@ -33,9 +33,13 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.view.View;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -51,9 +55,8 @@ import java.util.Locale;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list.
  */
 
-public class SensorREVColorDistance {
-    private LinearOpMode myOpMode = null;   // gain access to methods in the calling OpMode.
-
+@TeleOp
+public class TestColorSensor extends LinearOpMode{
     /**
      * Note that the REV Robotics Color-Distance incorporates two sensors into one device.
      * It has an IR proximity sensor which is used to calculate distance and an RGB color sensor.
@@ -88,82 +91,75 @@ public class SensorREVColorDistance {
     DistanceSensor clawSensorDistance;
     DistanceSensor intakeSensorDistance;
 
-    public SensorREVColorDistance(LinearOpMode opmode) {
-        myOpMode = opmode;
-    }
+    @Override
+    public void runOpMode() {
 
-    public void init() {
         // get a reference to the color sensor.
-        clawSensorColor = myOpMode.hardwareMap.get(ColorSensor.class, "clawColorSensor");
-        intakeSensorColor = myOpMode.hardwareMap.get(ColorSensor.class, "intakeColorSensor");
+        clawSensorColor = hardwareMap.get(ColorSensor.class, "clawColorSensor");
+        intakeSensorColor = hardwareMap.get(ColorSensor.class, "intakeColorSensor");
 
         // get a reference to the distance sensor that shares the same name.
-        clawSensorDistance = myOpMode.hardwareMap.get(DistanceSensor.class, "clawColorSensor");
-        intakeSensorDistance = myOpMode.hardwareMap.get(DistanceSensor.class, "intakeColorSensor");
+        clawSensorDistance = hardwareMap.get(DistanceSensor.class, "clawColorSensor");
+        intakeSensorDistance = hardwareMap.get(DistanceSensor.class, "intakeColorSensor");
 
-        myOpMode.telemetry.addData(">", "Sensors Initialized");
+        telemetry.addData(">", "Sensors Initialized");
+
+        waitForStart();
+
+        while (opModeIsActive()) {
+
+            // hsvValues is an array that will hold the hue, saturation, and value information.
+            float hsvValues[] = {0F, 0F, 0F};
+
+            // values is a reference to the hsvValues array.
+            final float values[] = hsvValues;
+
+            // sometimes it helps to multiply the raw RGB values with a scale factor
+            // to amplify/attentuate the measured values.
+            final double SCALE_FACTOR = 255;
+
+            // get a reference to the RelativeLayout so we can change the background
+            // color of the Robot Controller app to match the hue detected by the RGB sensor.
+            int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
+            final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
+
+            // loop and read the RGB and distance data.
+            // Note we use opModeIsActive() as our loop condition because it is an interruptible method.
+
+            // convert the RGB values to HSV values.
+            // multiply by the SCALE_FACTOR.
+            // then cast it back to int (SCALE_FACTOR is a double)
+            Color.RGBToHSV((int) (clawSensorColor.red() * SCALE_FACTOR),
+                    (int) (clawSensorColor.green() * SCALE_FACTOR),
+                    (int) (clawSensorColor.blue() * SCALE_FACTOR),
+                    hsvValues);
+
+            // send the info back to driver station using telemetry function.
+            telemetry.addData("Distance (cm)",
+                    String.format(Locale.US, "%.02f", intakeSensorDistance.getDistance(DistanceUnit.CM)));
+            telemetry.addData("Alpha", intakeSensorColor.alpha());
+            telemetry.addData("Red  ", intakeSensorColor.red());
+            telemetry.addData("Green", intakeSensorColor.green());
+            telemetry.addData("Blue ", intakeSensorColor.blue());
+            telemetry.addData("Hue", hsvValues[0]);
+
+            // change the background color to match the color detected by the RGB sensor.
+            // pass a reference to the hue, saturation, and value array as an argument
+            // to the HSVToColor method.
+            relativeLayout.post(new Runnable() {
+                public void run() {
+                    relativeLayout.setBackgroundColor(Color.HSVToColor(0xff, values));
+                }
+            });
+
+            telemetry.update();
+        }
     }
 
-    public void getColor() {
-
-        // hsvValues is an array that will hold the hue, saturation, and value information.
-        float hsvValues[] = {0F, 0F, 0F};
-
-        // values is a reference to the hsvValues array.
-        final float values[] = hsvValues;
-
-        // sometimes it helps to multiply the raw RGB values with a scale factor
-        // to amplify/attentuate the measured values.
-        final double SCALE_FACTOR = 255;
-
-        // get a reference to the RelativeLayout so we can change the background
-        // color of the Robot Controller app to match the hue detected by the RGB sensor.
-        int relativeLayoutId = myOpMode.hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", myOpMode.hardwareMap.appContext.getPackageName());
-        final View relativeLayout = ((Activity) myOpMode.hardwareMap.appContext).findViewById(relativeLayoutId);
-
-        // loop and read the RGB and distance data.
-        // Note we use opModeIsActive() as our loop condition because it is an interruptible method.
-
-        // convert the RGB values to HSV values.
-        // multiply by the SCALE_FACTOR.
-        // then cast it back to int (SCALE_FACTOR is a double)
-        Color.RGBToHSV((int) (clawSensorColor.red() * SCALE_FACTOR),
-                (int) (clawSensorColor.green() * SCALE_FACTOR),
-                (int) (clawSensorColor.blue() * SCALE_FACTOR),
-                hsvValues);
-
-        // send the info back to driver station using telemetry function.
-        myOpMode.telemetry.addData("Distance (cm)",
-                String.format(Locale.US, "%.02f", clawSensorDistance.getDistance(DistanceUnit.CM)));
-        myOpMode.telemetry.addData("Alpha", clawSensorColor.alpha());
-        myOpMode.telemetry.addData("Red  ", clawSensorColor.red());
-        myOpMode.telemetry.addData("Green", clawSensorColor.green());
-        myOpMode.telemetry.addData("Blue ", clawSensorColor.blue());
-        myOpMode.telemetry.addData("Hue", hsvValues[0]);
-
-        // change the background color to match the color detected by the RGB sensor.
-        // pass a reference to the hue, saturation, and value array as an argument
-        // to the HSVToColor method.
-        relativeLayout.post(new Runnable() {
-            public void run() {
-                relativeLayout.setBackgroundColor(Color.HSVToColor(0xff, values));
-            }
-        });
-
-        myOpMode.telemetry.update();
-    }
-
-    public int checkColorClaw(ColorSensor sensor) {
+    public int checkColor(ColorSensor sensor) {
         //if (clawSensorColor.) TODO: ADD YELLOW
         if (sensor.blue() > 100) return 2;
         else if (sensor.red() > 100) return 3;
-        else return 0;
-    }
-
-    public int checkColorIntake(ColorSensor sensor) {
-        //if (clawSensorColor.) TODO: ADD YELLOW
-        if (sensor.blue() > 150) return 2;
-        else if (sensor.red() > 150) return 3;
         else return 0;
     }
 
