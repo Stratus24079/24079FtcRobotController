@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.util.Range;
 
 
 public class PIDController {
-    //PID Control Class
+    // PID Control Class
 
     /*
      * Proportional Integral Derivative Controller
@@ -20,13 +20,13 @@ public class PIDController {
     double currentFilterEstimate = 0;
     double a = 0.5;
 
-    PIDController(double kpIn, double kiIn, double kdIn) {
+    public PIDController(double kpIn, double kiIn, double kdIn) {
         Kp = kpIn;
         Ki = kiIn;
         Kd = kdIn;
     }
 
-    double calculate(double reference, double currentPosition) {
+    public double calculate(double reference, double currentPosition) {
 
         // calculate the error
         double error = reference - currentPosition;
@@ -59,7 +59,11 @@ public class PIDController {
         return out;
     }
 
-    boolean targetReached(double reference, double currentPosition){
+    public void setMaxOut(double maxOut) {
+        this.maxOut = maxOut;
+    }
+
+    public boolean targetReached(double reference, double currentPosition){
         double error = reference-currentPosition;
         if (Math.abs(error) > errorMargin) {
             return false;
@@ -68,7 +72,7 @@ public class PIDController {
         }
     }
 
-    void reset() {
+    public void reset() {
         integralSum = 0;
         previousFilterEstimate = 0;
         currentFilterEstimate = 0;

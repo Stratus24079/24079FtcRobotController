@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.tests;
 
 import android.app.Activity;
 import android.graphics.Color;
@@ -135,6 +135,16 @@ public class TestColorSensor extends LinearOpMode{
                     hsvValues);
 
             // send the info back to driver station using telemetry function.
+            telemetry.addData("CLAW", "");
+            telemetry.addData("Distance (cm)",
+                    String.format(Locale.US, "%.02f", clawSensorDistance.getDistance(DistanceUnit.CM)));
+            telemetry.addData("Alpha", clawSensorColor.alpha());
+            telemetry.addData("Red  ", clawSensorColor.red());
+            telemetry.addData("Green", clawSensorColor.green());
+            telemetry.addData("Blue ", clawSensorColor.blue());
+            telemetry.addData("Hue", hsvValues[0]);
+
+            telemetry.addData("INTAkE", "");
             telemetry.addData("Distance (cm)",
                     String.format(Locale.US, "%.02f", intakeSensorDistance.getDistance(DistanceUnit.CM)));
             telemetry.addData("Alpha", intakeSensorColor.alpha());
@@ -157,9 +167,9 @@ public class TestColorSensor extends LinearOpMode{
     }
 
     public int checkColor(ColorSensor sensor) {
-        //if (clawSensorColor.) TODO: ADD YELLOW
-        if (sensor.blue() > 100) return 2;
-        else if (sensor.red() > 100) return 3;
+        if (sensor.red() > 380 && sensor.green() > 480) return 1;
+        if (sensor.blue() > 150) return 2;
+        else if (sensor.red() > 150) return 3;
         else return 0;
     }
 

@@ -30,6 +30,7 @@ public class TeleOpDrive extends LinearOpMode {
             if (gamepad1.dpad_up) {
                 robot.lift.liftMode = Lift.LiftMode.HIGH;
                 robot.intake.intakeJoint.setPosition(robot.intake.INTAKE_DOWN);
+                //robot.intake.extension.
                 robot.scoring.clawPosition = robot.scoring.CLAW_CLOSED;
                 robot.scoring.pivotPosition = robot.scoring.PIVOT_UP;
             }
@@ -48,7 +49,6 @@ public class TeleOpDrive extends LinearOpMode {
             }
 
             if (gamepad1.dpad_down) {
-                robot.lift.liftMode = Lift.LiftMode.GROUND;
                 robot.intake.intakeJoint.setPosition(robot.intake.INTAKE_DOWN);
                 robot.scoring.clawPosition = robot.scoring.CLAW_OPEN;
                 robot.scoring.pivotPosition = robot.scoring.PIVOT_DOWN;

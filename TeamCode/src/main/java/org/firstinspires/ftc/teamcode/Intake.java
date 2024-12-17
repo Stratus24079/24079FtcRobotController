@@ -35,7 +35,7 @@ public class Intake {
 
     public void init() {
         extensionPID = new PIDController(EXTENSION_KP, EXTENSION_KI, EXTENSION_KD);
-        extensionPID.maxOut = 0.95;
+        extensionPID.setMaxOut(0.95);
 
         extension = myOpMode.hardwareMap.get(DcMotor.class, "leftExtension");
         intake = myOpMode.hardwareMap.get(Servo.class, "intake");
@@ -85,66 +85,6 @@ public class Intake {
         } else {
             intake.setPosition(0.5);
         }
-    }
-
-    public class ExtensionOut1 implements Action {
-        @Override
-        public boolean run(@NonNull TelemetryPacket packet) {
-            double out = extensionPID.calculate(400, extension.getCurrentPosition());
-
-            extension.setPower(out);
-
-            if (Math.abs(400 - extension.getCurrentPosition()) > 10) {
-                return true;
-            } else {
-                extension.setPower(0);
-                myOpMode.telemetry.addData("Extension out", 0);
-                return false;
-            }
-        }
-    }
-    public Action extensionOut1() {
-        return new ExtensionOut1();
-    }
-
-    public class ExtensionOut2 implements Action {
-        @Override
-        public boolean run(@NonNull TelemetryPacket packet) {
-            double out = extensionPID.calculate(1000, extension.getCurrentPosition());
-
-            extension.setPower(out);
-
-            if (Math.abs(1000 - extension.getCurrentPosition()) > 10) {
-                return true;
-            } else {
-                extension.setPower(0);
-                myOpMode.telemetry.addData("Extension out", 0);
-                return false;
-            }
-        }
-    }
-    public Action extensionOut2() {
-        return new ExtensionOut2();
-    }
-
-    public class ExtensionOut3 implements Action {
-        @Override
-        public boolean run(@NonNull TelemetryPacket packet) {
-            double out = extensionPID.calculate(1600, extension.getCurrentPosition());
-
-            extension.setPower(out);
-
-            if (Math.abs(1600 - extension.getCurrentPosition()) > 10) {
-                return true;
-            } else {
-                extension.setPower(0);
-                myOpMode.telemetry.addData("Extension out", 0);
-                return false;
-            }
-        }
-    }
-    public Action extensionOut3() {
-        return new ExtensionOut3();
     }
 
     public class ExtensionOn implements Action {

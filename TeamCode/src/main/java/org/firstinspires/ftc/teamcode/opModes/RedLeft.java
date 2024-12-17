@@ -39,6 +39,7 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
+import org.firstinspires.ftc.teamcode.Lift;
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Robot;
 
@@ -60,60 +61,76 @@ public class RedLeft extends LinearOpMode {
 
         robot = new Robot(this);
         robot.init();
+        robot.scoring.claw.setPosition(robot.scoring.CLAW_CLOSED);
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         TrajectoryActionBuilder trajectory = drive.actionBuilder(initialPose)
-                .strafeToLinearHeading(new Vector2d(-44, -42), Math.toRadians(45)) // Score preload
+                .strafeToLinearHeading(new Vector2d(-49, -41), Math.toRadians(45)) // Score preload
+                .stopAndAdd(robot.scoring.closeClaw())
                 .stopAndAdd(robot.intake.intakeDown())
                 .stopAndAdd(robot.scoring.scoringPos())
                 .stopAndAdd(robot.lift.liftHigh())
                 .stopAndAdd(robot.scoring.resetPos())
+                .waitSeconds(0.1)
                 .stopAndAdd(robot.lift.liftGround())
+                .stopAndAdd(robot.intake.intakeUp())
 
-                .strafeToLinearHeading(new Vector2d(-26, -18), Math.toRadians(180)) // To 1st sample
+                .strafeToLinearHeading(new Vector2d(-28, -18), Math.toRadians(180)) // To 1st sample
+                .stopAndAdd(robot.intake.intakeDown())
+                .waitSeconds(0.4)
                 .stopAndAdd(robot.intake.intakeSpinIn())
-                .strafeTo(new Vector2d(-36, -18)) // Forward while intaking
+                .strafeTo(new Vector2d(-38, -18)) // Forward while intaking
                 .stopAndAdd(robot.intake.intakeStop())
                 .stopAndAdd(robot.intake.intakeUp())
-                .waitSeconds(0.5)
+                .waitSeconds(0.7)
                 .stopAndAdd(robot.intakeTransferWithSensor()) // Outtake until color sensor detects in claw
+                .stopAndAdd(robot.scoring.closeClaw())
                 .stopAndAdd(robot.intake.intakeDown())
-                .strafeToLinearHeading(new Vector2d(-44, -42), Math.toRadians(45)) // Score 1st sample
+                .strafeToLinearHeading(new Vector2d(-47, -39), Math.toRadians(45)) // Score 1st sample
                 .stopAndAdd(robot.scoring.scoringPos())
                 .stopAndAdd(robot.lift.liftHigh())
                 .stopAndAdd(robot.scoring.resetPos())
+                .waitSeconds(0.1)
                 .stopAndAdd(robot.lift.liftGround())
 
                 .strafeToLinearHeading(new Vector2d(-40, -17), Math.toRadians(180)) // To 2nd sample
                 .stopAndAdd(robot.intake.intakeSpinIn())
-                .strafeTo(new Vector2d(-46, -17)) // Forward while intaking
+                .strafeTo(new Vector2d(-48, -17)) // Forward while intaking
                 .stopAndAdd(robot.intake.intakeStop())
                 .stopAndAdd(robot.intake.intakeUp())
-                .waitSeconds(0.5)
+                .waitSeconds(0.7)
                 .stopAndAdd(robot.intakeTransferWithSensor()) // Outtake until color sensor detects in claw
+                .stopAndAdd(robot.scoring.closeClaw())
                 .stopAndAdd(robot.intake.intakeDown())
-                .strafeToLinearHeading(new Vector2d(-44, -42), Math.toRadians(45)) // Score 2nd sample
+                .strafeToLinearHeading(new Vector2d(-46, -38), Math.toRadians(45)) // Score 2nd sample
                 .stopAndAdd(robot.scoring.scoringPos())
                 .stopAndAdd(robot.lift.liftHigh())
                 .stopAndAdd(robot.scoring.resetPos())
+                .waitSeconds(0.1)
                 .stopAndAdd(robot.lift.liftGround())
 
-                .strafeToLinearHeading(new Vector2d(-50, -16), Math.toRadians(180)) // To 3rd sample
+                /*.strafeToLinearHeading(new Vector2d(-43, -16), Math.toRadians(180)) // To 3rd sample
                 .stopAndAdd(robot.intake.intakeSpinIn())
                 .strafeTo(new Vector2d(-56, -16)) // Forward while intaking
                 .stopAndAdd(robot.intake.intakeStop())
+                .strafeTo(new Vector2d(-53, -16))
+                .stopAndAdd(robot.intake.intakeSpinIn())
+                .waitSeconds(0.3)
+                .stopAndAdd(robot.intake.intakeStop())
                 .stopAndAdd(robot.intake.intakeUp())
-                .waitSeconds(0.5)
+                .waitSeconds(0.7)
                 .stopAndAdd(robot.intakeTransferWithSensor()) // Outtake until color sensor detects in claw
+                .stopAndAdd(robot.scoring.closeClaw())
                 .stopAndAdd(robot.intake.intakeDown())
-                .strafeToLinearHeading(new Vector2d(-44, -42), Math.toRadians(45)) // Score 3rd sample
+                .strafeToLinearHeading(new Vector2d(-44, -36), Math.toRadians(45)) // Score 3rd sample
                 .stopAndAdd(robot.scoring.scoringPos())
                 .stopAndAdd(robot.lift.liftHigh())
                 .stopAndAdd(robot.scoring.resetPos())
-                .stopAndAdd(robot.lift.liftGround())
+                .waitSeconds(0.1)
+                .stopAndAdd(robot.lift.liftGround())*/
 
-                .strafeToLinearHeading(new Vector2d(-20, 0), Math.toRadians(180))
+                .strafeToLinearHeading(new Vector2d(-20, 10), Math.toRadians(180))
                 .strafeTo(new Vector2d(-14, 0))
                 .stopAndAdd(robot.scoring.scoringPos())
                 .waitSeconds(5);

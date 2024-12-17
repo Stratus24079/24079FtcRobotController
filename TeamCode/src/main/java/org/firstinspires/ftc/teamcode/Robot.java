@@ -49,8 +49,24 @@ public class Robot {
         //sensors.getColor();
     }
 
+    public Action transferWithSensor() {
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                sensors.getColor();
+
+                if (sensors.checkColorClaw(sensors.clawSensorColor) == 0) {
+                    intake.intake.setPosition(0);
+                } else {
+                    intake.intake.setPosition(0.5);
+                    scoring.closeClaw();
+                }
+                return false;
+            }
+        };
+    }
+
     public class IntakeTransferWithSensor implements Action {
-        ElapsedTime runtime = new ElapsedTime(0);
 
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {

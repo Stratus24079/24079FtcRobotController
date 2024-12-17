@@ -1,5 +1,5 @@
 // Made by Mohnish Sivakumar (FTC Programming Head, Co-Secretary)
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.tests;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;

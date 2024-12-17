@@ -16,13 +16,13 @@ public class Scoring {
     public Servo clawJoint = null;
     public Servo pivot = null;
 
-    public final double CLAW_OPEN = 0.12;
+    public final double CLAW_OPEN = 0.19;
     public final double CLAW_CLOSED = 0;
     public final double PIVOT_UP = 0.3;
     public final double PIVOT_DOWN = 1;
     public final double PIVOT_GET_SPECIMEN = 0;
     public final double PIVOT_SPECIMEN_HIGH = 0.4;
-    public final double CLAW_JOINT = 0.63;
+    public final double CLAW_JOINT = 0.65;
     public final double CLAW_JOINT_GET_SPECIMEN = 0.2;
     public final double CLAW_JOINT_SPECIMEN_HIGH = 0.55;
 
