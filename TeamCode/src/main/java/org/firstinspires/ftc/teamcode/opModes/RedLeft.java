@@ -42,6 +42,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import org.firstinspires.ftc.teamcode.Lift;
 import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.roadrunner.SparkFunOTOSDrive;
 
 @Autonomous(name = "RedLeft", group = "Autonomous")
 
@@ -63,7 +64,7 @@ public class RedLeft extends LinearOpMode {
         robot.init();
         robot.scoring.claw.setPosition(robot.scoring.CLAW_CLOSED);
 
-        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
+        SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, initialPose);
 
         TrajectoryActionBuilder trajectory = drive.actionBuilder(initialPose)
                 .strafeToLinearHeading(new Vector2d(-49, -41), Math.toRadians(45)) // Score preload
