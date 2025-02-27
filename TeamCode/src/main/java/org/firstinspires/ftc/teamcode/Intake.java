@@ -24,8 +24,8 @@ public class Intake {
     public static final double EXTENSION_KP = 0.01;
     public static final double EXTENSION_KI = 0;
     public static final double EXTENSION_KD = 0;
-    public final double INTAKE_DOWN = 0.8;
-    public final double INTAKE_UP = 0.1;
+    public final double INTAKE_DOWN = 0.7;
+    public final double INTAKE_UP = 0;
 
     public double intakeJointPosition;
 
