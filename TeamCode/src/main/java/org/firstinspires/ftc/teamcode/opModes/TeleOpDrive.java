@@ -30,9 +30,9 @@ public class TeleOpDrive extends LinearOpMode {
             if (gamepad1.dpad_up) {
                 robot.lift.liftMode = Lift.LiftMode.HIGH;
                 robot.intake.intakeJoint.setPosition(robot.intake.INTAKE_DOWN);
-                //robot.intake.extension.
                 robot.scoring.clawPosition = robot.scoring.CLAW_CLOSED;
                 robot.scoring.pivotPosition = robot.scoring.PIVOT_UP;
+                robot.scoring.clawJointPosition = robot.scoring.CLAW_JOINT_HIGH;
             }
 
             if (gamepad1.dpad_right) {
@@ -40,18 +40,21 @@ public class TeleOpDrive extends LinearOpMode {
                 robot.intake.intakeJoint.setPosition(robot.intake.INTAKE_DOWN);
                 robot.scoring.clawPosition = robot.scoring.CLAW_CLOSED;
                 robot.scoring.pivotPosition = robot.scoring.PIVOT_UP;
+                robot.scoring.clawJointPosition = robot.scoring.CLAW_JOINT_HIGH;
             }
 
             if (gamepad1.dpad_left) {
                 robot.intake.intakeJoint.setPosition(robot.intake.INTAKE_DOWN);
-                robot.scoring.clawPosition = robot.scoring.CLAW_CLOSED;
-                robot.scoring.pivotPosition = robot.scoring.PIVOT_UP;
+                robot.scoring.clawPosition = robot.scoring.CLAW_OPEN;
+                robot.scoring.pivotPosition = robot.scoring.PIVOT_MID;
+                robot.scoring.clawJointPosition = robot.scoring.CLAW_JOINT;
             }
 
             if (gamepad1.dpad_down) {
                 robot.intake.intakeJoint.setPosition(robot.intake.INTAKE_DOWN);
                 robot.scoring.clawPosition = robot.scoring.CLAW_OPEN;
                 robot.scoring.pivotPosition = robot.scoring.PIVOT_DOWN;
+                robot.scoring.clawJointPosition = robot.scoring.CLAW_JOINT;
             }
 
             robot.teleOp();

@@ -23,7 +23,8 @@ public class Lift {
     public static final double LIFT_KP = 0.01;
     public static final double LIFT_KI = 0;
     public static final double LIFT_KD = 0;
-    public static final int LIFT_HIGH = 2300;
+    public static final int LIFT_HIGH = 2000;
+    public static final int LIFT_HIGH_AUTO = 2400;
     public static final int LIFT_LOW = 1000;
 
     // if the subsystem has explicit states, it can be helpful to use an enum to define them
@@ -141,8 +142,8 @@ public class Lift {
 
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            double outLeft = leftLiftPID.calculate(LIFT_HIGH, leftLift.getCurrentPosition());
-            double outRight = rightLiftPID.calculate(LIFT_HIGH, rightLift.getCurrentPosition());
+            double outLeft = leftLiftPID.calculate(LIFT_HIGH_AUTO, leftLift.getCurrentPosition());
+            double outRight = rightLiftPID.calculate(LIFT_HIGH_AUTO, rightLift.getCurrentPosition());
 
             leftLift.setPower(outLeft);
             rightLift.setPower(outRight);
@@ -183,7 +184,7 @@ public class Lift {
             leftLift.setPower(outLeft);
             rightLift.setPower(outRight);
 
-            if (Math.abs(leftLift.getCurrentPosition()) > 10) {
+            if (Math.abs(leftLift.getCurrentPosition()) > 20) {
                 return true;
             } else {
                 leftLift.setPower(0);

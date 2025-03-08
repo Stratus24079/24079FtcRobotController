@@ -16,15 +16,17 @@ public class Scoring {
     public Servo clawJoint = null;
     public Servo pivot = null;
 
-    public final double CLAW_OPEN = 0.19;
+    public final double CLAW_OPEN = 0.16;
     public final double CLAW_CLOSED = 0;
     public final double PIVOT_UP = 0.3;
-    public final double PIVOT_DOWN = 1;
-    public final double PIVOT_GET_SPECIMEN = 0;
-    public final double PIVOT_SPECIMEN_HIGH = 0.4;
-    public final double CLAW_JOINT = 0.65;
-    public final double CLAW_JOINT_GET_SPECIMEN = 0.2;
-    public final double CLAW_JOINT_SPECIMEN_HIGH = 0.55;
+    public final double PIVOT_MID = 0.57;
+    public final double PIVOT_DOWN = 0.767;
+    public final double PIVOT_GET_SPECIMEN = 0.06;
+    public final double PIVOT_SPECIMEN_HIGH = 0.2;
+    public final double PIVOT_SPECIMEN_SCORE = 0.28;
+    public final double CLAW_JOINT = 0.58;
+    public final double CLAW_JOINT_GET_SPECIMEN = 0.8;
+    public final double CLAW_JOINT_HIGH = 0.6;
 
     public double pivotPosition;
     public double clawPosition;
@@ -57,6 +59,7 @@ public class Scoring {
         pivot.setPosition(pivotPosition);
 
         // set positions
+
         if (myOpMode.gamepad1.left_bumper) {
             clawPosition = CLAW_OPEN;
         }
@@ -80,19 +83,17 @@ public class Scoring {
         }
 
         if (myOpMode.gamepad2.dpad_left) {
-            pivotPosition = PIVOT_GET_SPECIMEN;
-            clawJointPosition = CLAW_JOINT_GET_SPECIMEN;
-            clawPosition = CLAW_CLOSED;
+            pivotPosition = PIVOT_SPECIMEN_SCORE;
         }
 
         if (myOpMode.gamepad2.dpad_up) {
             pivotPosition = PIVOT_SPECIMEN_HIGH;
-            clawJointPosition = CLAW_JOINT_SPECIMEN_HIGH;
+            clawJointPosition = CLAW_JOINT_HIGH;
             clawPosition = CLAW_CLOSED;
         }
 
         if (myOpMode.gamepad2.dpad_right) {
-            pivotPosition = PIVOT_GET_SPECIMEN + 0.2;
+           //pivotPosition = PIVOT_GET_SPECIMEN + 0.1;
         }
     }
 
@@ -101,10 +102,23 @@ public class Scoring {
         public boolean run(@NonNull TelemetryPacket packet) {
             pivot.setPosition(PIVOT_UP);
             claw.setPosition(CLAW_CLOSED);
+            clawJoint.setPosition(CLAW_JOINT_HIGH);
             return false;
         }
     }
     public Action scoringPos() { return new ScoringPos(); }
+
+    public class PivotMid implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            pivot.setPosition(PIVOT_MID);
+            clawJoint.setPosition(CLAW_JOINT);
+            claw.setPosition(CLAW_OPEN);
+            return false;
+        }
+    }
+
+    public Action pivotMid() { return new PivotMid(); }
 
     public class GetSpecimen implements Action {
         @Override
@@ -124,7 +138,7 @@ public class Scoring {
         public boolean run(@NonNull TelemetryPacket packet) {
             pivot.setPosition(PIVOT_SPECIMEN_HIGH);
             claw.setPosition(CLAW_CLOSED);
-            clawJoint.setPosition(CLAW_JOINT_SPECIMEN_HIGH);
+            clawJoint.setPosition(CLAW_JOINT_HIGH);
             return false;
         }
     }
@@ -135,7 +149,7 @@ public class Scoring {
     public class ScoreSpecimen implements Action {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            pivot.setPosition(PIVOT_GET_SPECIMEN + 0.2);
+            pivot.setPosition(PIVOT_SPECIMEN_SCORE);
             return false;
         }
     }
@@ -148,6 +162,7 @@ public class Scoring {
         public boolean run(@NonNull TelemetryPacket packet) {
             pivot.setPosition(PIVOT_DOWN);
             claw.setPosition(CLAW_OPEN);
+            clawJoint.setPosition(CLAW_JOINT);
             return false;
         }
     }
@@ -158,7 +173,7 @@ public class Scoring {
     public class OpenClaw implements Action {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            claw.setPosition(CLAW_OPEN);
+            claw.setPosition(CLAW_OPEN + 0.04);
             return false;
         }
     }

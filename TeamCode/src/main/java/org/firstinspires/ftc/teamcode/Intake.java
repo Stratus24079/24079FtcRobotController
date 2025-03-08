@@ -24,7 +24,7 @@ public class Intake {
     public static final double EXTENSION_KP = 0.01;
     public static final double EXTENSION_KI = 0;
     public static final double EXTENSION_KD = 0;
-    public final double INTAKE_DOWN = 0.7;
+    public final double INTAKE_DOWN = 0.6;
     public final double INTAKE_UP = 0;
 
     public double intakeJointPosition;
@@ -59,12 +59,6 @@ public class Intake {
 
         // send positions
         intakeJoint.setPosition(intakeJointPosition);
-
-        // set positions
-        if (myOpMode.gamepad2.left_trigger > 0 && extension.getCurrentPosition() > -600
-                || myOpMode.gamepad2.right_trigger > 0 && extension.getCurrentPosition() < -600) {
-            intakeJoint.setPosition(INTAKE_UP);
-        }
 
         if (myOpMode.gamepad2.b) {
             intakeJointPosition = INTAKE_DOWN;
@@ -148,12 +142,7 @@ public class Intake {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
             intake.setPosition(0);
-            if (runtime.seconds() < 1) {
-                return true;
-            } else {
-                intake.setPosition(0.5);
-                return false;
-            }
+            return false;
         }
     }
     public Action intakeSpinOut() {
