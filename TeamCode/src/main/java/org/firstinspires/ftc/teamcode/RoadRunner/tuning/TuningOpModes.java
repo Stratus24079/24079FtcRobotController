@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.tuning;
+package org.firstinspires.ftc.teamcode.RoadRunner.tuning;
 
 import androidx.annotation.NonNull;
 
@@ -89,8 +89,8 @@ public final class TuningOpModes {
             }
 
             @Override
-            public float getHeadingVelocity(UnnormalizedAngleUnit unit) {
-                return (float) pl.driver.getHeadingVelocity(unit);
+            public float getHeadingVelocity() {
+                return (float) pl.driver.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES);
             }
 
             @Override
@@ -297,7 +297,7 @@ public final class TuningOpModes {
         manager.register(metaForClass(DeadWheelDirectionDebugger.class), new DeadWheelDirectionDebugger(dvf));
 
         manager.register(metaForClass(ManualFeedbackTuner.class), ManualFeedbackTuner.class);
-        manager.register(metaForClass(SplineTest.class), SplineTest.class);
+        manager.register(metaForClass(org.firstinspires.ftc.teamcode.tuning.SplineTest.class), org.firstinspires.ftc.teamcode.tuning.SplineTest.class);
         manager.register(metaForClass(LocalizationTest.class), LocalizationTest.class);
 
         manager.register(metaForClass(OTOSAngularScalarTuner.class), new OTOSAngularScalarTuner(dvf));
