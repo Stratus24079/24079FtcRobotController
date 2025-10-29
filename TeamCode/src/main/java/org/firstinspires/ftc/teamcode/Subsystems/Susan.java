@@ -77,6 +77,5 @@ public class Susan {
                 innerServo.setPower(0);
             }
         }
-
     }
 }
