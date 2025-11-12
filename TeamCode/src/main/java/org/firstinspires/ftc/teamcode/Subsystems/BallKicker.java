@@ -18,8 +18,8 @@ public class BallKicker {
 
     // Define Drive constants.  Make them public so they CAN be used by the calling OpMode
     //TODO Update values based on desired position
-    public double UP_POSITION = 0;
-    public double DOWN_POSITION = 0.2;
+    public double UP_POSITION = 0.2;
+    public double DOWN_POSITION = 0;
     public String SERVO_NAME = "";
     public KickerMode kickerMode = KickerMode.KICKER_DOWN;
 

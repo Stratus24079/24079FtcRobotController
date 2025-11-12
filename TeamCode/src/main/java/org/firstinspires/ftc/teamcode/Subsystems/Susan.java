@@ -22,7 +22,7 @@ public class Susan {
 
     // Define Drive constants.  Make them public so they CAN be used by the calling OpMode
     //TODO Update values based on desired position
-    public final double INNER_SERVO_SPEED = 1;
+    public final double INNER_SERVO_SPEED = 0.5;
     public Susan.SusanMode susanMode = SusanMode.MANUAL;
 
     //Constructor
@@ -31,11 +31,14 @@ public class Susan {
     }
 
     public void init() {
-        ballKicker1 = new BallKicker(myOpMode, "ballKicker1", 0.2, 0);
-        ballKicker2 = new BallKicker(myOpMode, "ballKicker2", 0.2, 0);
-        ballKicker3 = new BallKicker(myOpMode, "ballKicker3", 0.2, 0);
-        innerServo = myOpMode.hardwareMap.get(CRServo.class, "innerServo");
-        innerServo.setPower(INNER_SERVO_SPEED);
+        ballKicker1 = new BallKicker(myOpMode, "ballKicker1", 0.1, 0.2);
+        ballKicker2 = new BallKicker(myOpMode, "ballKicker2", 0.1, 0.2);
+        ballKicker3 = new BallKicker(myOpMode, "ballKicker3", 0, 0.2);
+        innerServo = myOpMode.hardwareMap.get(CRServo.class, "innerIntake");
+
+        ballKicker1.init();
+        ballKicker2.init();
+        ballKicker3.init();
 
         myOpMode.telemetry.addData(">", "Susan Initialized");
     }
@@ -67,7 +70,6 @@ public class Susan {
             } else {
                 ballKicker3.kickerMode = BallKicker.KickerMode.KICKER_DOWN;
             }
-
 
             if (myOpMode.gamepad2.dpad_up) {
                 innerServo.setPower(INNER_SERVO_SPEED);

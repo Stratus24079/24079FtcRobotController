@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -37,10 +38,10 @@ public class Drivetrain {
         leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
         myOpMode.telemetry.addData(">", "Drivetrain Initialized");
     }
@@ -92,20 +93,20 @@ public class Drivetrain {
         }
 
         if (myOpMode.gamepad1.right_bumper) {
-            leftFrontDrive.setPower(frontLeftPower);
-            rightFrontDrive.setPower(frontRightPower);
-            leftBackDrive.setPower(backLeftPower);
-            rightBackDrive.setPower(backRightPower);
+            leftFrontDrive.setPower(frontLeftPower * 1.5);
+            rightFrontDrive.setPower(frontRightPower * 1.5);
+            leftBackDrive.setPower(backLeftPower * 1.5);
+            rightBackDrive.setPower(backRightPower * 1.5);
         } else if (myOpMode.gamepad1.left_bumper) {
             leftFrontDrive.setPower(frontLeftPower / 7);
             rightFrontDrive.setPower(frontRightPower / 7);
             leftBackDrive.setPower(backLeftPower / 7);
             rightBackDrive.setPower(backRightPower / 7);
         } else {
-            leftFrontDrive.setPower(frontLeftPower / 2);
-            rightFrontDrive.setPower(frontRightPower / 2);
-            leftBackDrive.setPower(backLeftPower / 2);
-            rightBackDrive.setPower(backRightPower / 2);
+            leftFrontDrive.setPower(frontLeftPower);
+            rightFrontDrive.setPower(frontRightPower);
+            leftBackDrive.setPower(backLeftPower);
+            rightBackDrive.setPower(backRightPower);
         }
     }
 }

@@ -41,7 +41,7 @@ public class Intake {
 
     public void teleOp() {
         update();
-        
+
         if (myOpMode.gamepad2.left_bumper) {
             intakeMode = IntakeMode.IN;
         } else if (myOpMode.gamepad2.right_bumper) {

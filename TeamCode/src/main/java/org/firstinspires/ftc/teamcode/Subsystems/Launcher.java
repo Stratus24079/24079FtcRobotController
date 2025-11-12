@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Launcher {
@@ -38,6 +39,7 @@ public class Launcher {
     public void init(){
         spin = myOpMode.hardwareMap.get(DcMotorEx.class, "launcher");
         spin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spin.setDirection(DcMotor.Direction.REVERSE);
 
         hood = myOpMode.hardwareMap.get(Servo.class, "hood");
         hood.setPosition(FAR);
@@ -60,9 +62,9 @@ public class Launcher {
     public void teleOp(){
         update();
 
-        if (myOpMode.gamepad1.y) {
+        if (myOpMode.gamepad1.x) {
             launcherMode = LauncherMode.ON;
-        } else if (myOpMode.gamepad1.x) {
+        } else if (myOpMode.gamepad1.y) {
             launcherMode = LauncherMode.OFF;
         }
         if (myOpMode.gamepad1.a) {
