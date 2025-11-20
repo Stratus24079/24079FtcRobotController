@@ -1,19 +1,24 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Launcher {
     private OpMode myOpMode = null;
 
     public DcMotorEx spin = null;
     public Servo hood = null;
-    public double FAR = 0;
+    public double FAR = 0.25;
     public double CLOSE = 1;
-    public double revolutions_per_minute = 5000;
+    public double revolutions_per_minute = 5000; //og: 5000
     public static final double TICKS_PER_REVOLUTION = 28;
     double TICKS_PER_SECOND = revolutions_per_minute / 60 * TICKS_PER_REVOLUTION;
 
@@ -38,11 +43,11 @@ public class Launcher {
 
     public void init(){
         spin = myOpMode.hardwareMap.get(DcMotorEx.class, "launcher");
-        spin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spin.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         spin.setDirection(DcMotor.Direction.REVERSE);
 
         hood = myOpMode.hardwareMap.get(Servo.class, "hood");
-        hood.setPosition(FAR);
+        hood.setPosition(CLOSE);
     }
 
     public void update(){
@@ -73,5 +78,48 @@ public class Launcher {
             hoodMode = HoodMode.CLOSE;
         }
     }
+
+    public Action launcherOn() {
+        return new Action() {
+            ElapsedTime timer = new ElapsedTime();
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    timer.reset();
+                    spin.setPower(0.85);
+                    initialized = true;
+                }
+                return timer.seconds() < 2;
+                //double vel = spin.getVelocity();
+                //packet.put("shooterVelocity", vel);
+                //return vel < 10_000.0;
+            }
+        };
+    }
+
+    public Action launcherOff() {
+        return new Action() {
+            ElapsedTime timer = new ElapsedTime();
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    timer.reset();
+                    spin.setVelocity(0);
+                    initialized = true;
+                }
+                return timer.seconds() < 2;
+                //double vel = spin.getVelocity();
+                //packet.put("shooterVelocity", vel);
+                //return vel < 10_000.0;
+            }
+        };
+    }
+
+
+
 
 }

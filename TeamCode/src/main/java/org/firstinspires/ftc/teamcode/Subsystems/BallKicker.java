@@ -1,8 +1,13 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class BallKicker {
     /* Declare OpMode members. */
@@ -51,6 +56,28 @@ public class BallKicker {
         update();
         //Set states based on gamepad presses
         //TODO Update based on desired control scheme
+    }
+
+    public Action kickBall() {
+        return new Action() {
+            ElapsedTime timer = new ElapsedTime();
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    timer.reset();
+                    kicker.setPosition(UP_POSITION);
+                    initialized = true;
+                }
+                if (timer.seconds() < 2.5) {
+                    return true;
+                } else {
+                    kicker.setPosition(DOWN_POSITION);
+                    return false;
+                }
+            }
+        };
     }
 
 }

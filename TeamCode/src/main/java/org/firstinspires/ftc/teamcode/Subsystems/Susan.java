@@ -1,8 +1,13 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Susan {
     /* Declare OpMode members. */
@@ -31,9 +36,9 @@ public class Susan {
     }
 
     public void init() {
-        ballKicker1 = new BallKicker(myOpMode, "ballKicker1", 0.1, 0.2);
-        ballKicker2 = new BallKicker(myOpMode, "ballKicker2", 0.1, 0.2);
-        ballKicker3 = new BallKicker(myOpMode, "ballKicker3", 0, 0.2);
+        ballKicker1 = new BallKicker(myOpMode, "ballKicker1", 0.06, 0.16);
+        ballKicker2 = new BallKicker(myOpMode, "ballKicker2", 0.06, 0.16);
+        ballKicker3 = new BallKicker(myOpMode, "ballKicker3", 0.1, 0.2);
         innerServo = myOpMode.hardwareMap.get(CRServo.class, "innerIntake");
 
         ballKicker1.init();
@@ -79,5 +84,42 @@ public class Susan {
                 innerServo.setPower(0);
             }
         }
+    }
+
+    public Action innerIntakeOn() {
+        return new Action() {
+            ElapsedTime timer = new ElapsedTime();
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    timer.reset();
+                    innerServo.setPower(INNER_SERVO_SPEED);
+                    initialized = true;
+                }
+                return timer.seconds() < 1;
+                //double vel = spin.getVelocity();
+                //packet.put("shooterVelocity", vel);
+                //return vel < 10_000.0;
+            }
+        };
+    }
+
+    public Action innerIntakeOff() {
+        return new Action() {
+            ElapsedTime timer = new ElapsedTime();
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    timer.reset();
+                    innerServo.setPower(0);
+                    initialized = true;
+                }
+                return timer.seconds() < 1;
+            }
+        };
     }
 }
