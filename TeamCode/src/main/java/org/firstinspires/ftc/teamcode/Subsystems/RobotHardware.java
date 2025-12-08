@@ -17,18 +17,22 @@ public class RobotHardware{
     public Launcher launcher;
     public Susan susan;
 
+    String col = "red";
+
     // Define a constructor that allows the OpMode to pass a reference to itself.
     public RobotHardware(LinearOpMode opmode) {
         myOpMode = opmode;
     }
 
-    public void init() {
+    public void init(String colIn) {
         drivetrain = new Drivetrain(myOpMode);
         intake = new Intake(myOpMode);
         launcher = new Launcher(myOpMode);
         susan = new Susan(myOpMode);
 
-        drivetrain.init();
+        col = colIn;
+
+        drivetrain.init(col);
         intake.init();
         launcher.init();
         susan.init();

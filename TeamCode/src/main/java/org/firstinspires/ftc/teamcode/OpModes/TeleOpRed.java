@@ -4,8 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Subsystems.RobotHardware;
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name="AutoBlueRightAndRedLeft", group="Linear OpMode")
-public class AutoBlueRightAndRedLeft extends LinearOpMode {
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name="TeleOpRed", group="Linear OpMode")
+public class TeleOpRed extends LinearOpMode {
 
     //declaring instance of robot hardware
     RobotHardware robot;
@@ -22,6 +22,11 @@ public class AutoBlueRightAndRedLeft extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
-        robot.drivetrain.encoderDrive(0.5, -60, 0.2);
+
+        // run until the end of the match (driver presses STOP)
+        while (opModeIsActive()) {
+            robot.teleOp();
+            telemetry.update();
+        }
     }
 }

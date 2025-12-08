@@ -1,22 +1,43 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import android.graphics.Color;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Susan {
     /* Declare OpMode members. */
     private LinearOpMode myOpMode = null;   // gain access to methods in the calling OpMode.
 
+    public NormalizedColorSensor colorSensor1 = null;
+    public NormalizedColorSensor colorSensor2 = null;
+    public NormalizedColorSensor colorSensor3 = null;
+    public Servo RGBLight1 = null;
+    public Servo RGBLight2 = null;
+    public Servo RGBLight3 = null;
+    final float[] hsvValues1 = new float[3];
+    final float[] hsvValues2 = new float[3];
+    final float[] hsvValues3 = new float[3];
+    float gain = 15;
     public BallKicker ballKicker1 = null;
     public BallKicker ballKicker2 = null;
     public BallKicker ballKicker3 = null;
-    public CRServo innerServo = null;
+    public DcMotor innerMotor = null;
 
     //TODO Adjust based on desired states
     public enum SusanMode {
@@ -27,7 +48,7 @@ public class Susan {
 
     // Define Drive constants.  Make them public so they CAN be used by the calling OpMode
     //TODO Update values based on desired position
-    public final double INNER_SERVO_SPEED = 0.5;
+    public final double INNER_MOTOR_SPEED = 0.5;
     public Susan.SusanMode susanMode = SusanMode.MANUAL;
 
     //Constructor
@@ -36,10 +57,34 @@ public class Susan {
     }
 
     public void init() {
+        colorSensor1 = myOpMode.hardwareMap.get(NormalizedColorSensor.class, "colorSensor1");
+        colorSensor2 = myOpMode.hardwareMap.get(NormalizedColorSensor.class, "colorSensor2");
+        colorSensor3 = myOpMode.hardwareMap.get(NormalizedColorSensor.class, "colorSensor3");
+
+        RGBLight1 = myOpMode.hardwareMap.get(Servo.class, "RGB1");
+        RGBLight2 = myOpMode.hardwareMap.get(Servo.class, "RGB2");
+        RGBLight3 = myOpMode.hardwareMap.get(Servo.class, "RGB3");
+
+        colorSensor1.setGain(gain);
+        colorSensor2.setGain(gain);
+        colorSensor3.setGain(gain);
+
+        if (colorSensor1 instanceof SwitchableLight) {
+            ((SwitchableLight)colorSensor1).enableLight(true);
+        }
+        if (colorSensor2 instanceof SwitchableLight) {
+            ((SwitchableLight)colorSensor2).enableLight(true);
+        }
+        if (colorSensor3 instanceof SwitchableLight) {
+            ((SwitchableLight)colorSensor3).enableLight(true);
+        }
+
         ballKicker1 = new BallKicker(myOpMode, "ballKicker1", 0.06, 0.16);
         ballKicker2 = new BallKicker(myOpMode, "ballKicker2", 0.06, 0.16);
         ballKicker3 = new BallKicker(myOpMode, "ballKicker3", 0.1, 0.2);
-        innerServo = myOpMode.hardwareMap.get(CRServo.class, "innerIntake");
+        innerMotor = myOpMode.hardwareMap.get(DcMotor.class, "innerIntake");
+
+        innerMotor.setDirection(DcMotor.Direction.REVERSE);
 
         ballKicker1.init();
         ballKicker2.init();
@@ -53,12 +98,74 @@ public class Susan {
         ballKicker1.update();
         ballKicker2.update();
         ballKicker3.update();
+        RGBLight();
+        myOpMode.telemetry.addData("rgb1", hsvValues1[0]);
+        myOpMode.telemetry.addData("distance1", ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM));
+        myOpMode.telemetry.addData("rgb2", hsvValues2[0]);
+        myOpMode.telemetry.addData("distance2", ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM));
+        myOpMode.telemetry.addData("rgb3", hsvValues3[0]);
+        myOpMode.telemetry.addData("distance3", ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM));
+        // Get the normalized colors from the sensor
+        NormalizedRGBA colors = colorSensor1.getNormalizedColors();
+        // Update the hsvValues array by passing it to Color.colorToHSV()
+        Color.colorToHSV(colors.toColor(), hsvValues1);
+        myOpMode.telemetry.addLine()
+                .addData("Red", "%.3f", colors.red)
+                .addData("Green", "%.3f", colors.green)
+                .addData("Blue", "%.3f", colors.blue);
+        myOpMode.telemetry.addLine()
+                .addData("Hue", "%.3f", hsvValues1[0])
+                .addData("Saturation", "%.3f", hsvValues1[1])
+                .addData("Value", "%.3f", hsvValues1[2]);
+        myOpMode.telemetry.addData("Alpha", "%.3f", colors.alpha);
+
+        /* If this color sensor also has a distance sensor, display the measured distance.
+         * Note that the reported distance is only useful at very close range, and is impacted by
+         * ambient light and surface reflectivity. */
+        if (colorSensor1 instanceof DistanceSensor) {
+            myOpMode.telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM));
+        }
+    }
+
+    public void RGBLight(){
+        NormalizedRGBA colors1 = colorSensor1.getNormalizedColors();
+        NormalizedRGBA colors2 = colorSensor2.getNormalizedColors();
+        NormalizedRGBA colors3 = colorSensor3.getNormalizedColors();
+
+        Color.colorToHSV(colors1.toColor(), hsvValues1);
+        Color.colorToHSV(colors2.toColor(), hsvValues2);
+        Color.colorToHSV(colors3.toColor(), hsvValues3);
+
+        if (hsvValues1[0] >= 180 && ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) > 10) {
+            RGBLight1.setPosition(0.7);
+        } else if (hsvValues1[0] > 120 && ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) > 10) {
+            RGBLight1.setPosition(0.5);
+        } else {
+            RGBLight1.setPosition(0);
+        }
+
+        if (hsvValues2[0] >= 180 && ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) >  10) {
+            RGBLight2.setPosition(0.7);
+        } else if (hsvValues2[0] > 120 && ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) >  10) {
+            RGBLight2.setPosition(0.5);
+        } else {
+            RGBLight2.setPosition(0);
+        }
+
+        if (hsvValues3[0] >= 180 && ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) >  10) {
+            RGBLight3.setPosition(0.7);
+        }
+        else if (hsvValues3[0] > 120 && ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) >  10) {
+            RGBLight3.setPosition(0.5);
+        } else {
+            RGBLight3.setPosition(0);
+        }
+
     }
 
     public void teleOp() {
         update();
         //Set states based on gamepad presses
-        //TODO Update based on desired control scheme
         if (susanMode == SusanMode.MANUAL) {
             if (myOpMode.gamepad2.x) {
                 ballKicker1.kickerMode = BallKicker.KickerMode.KICKER_UP;
@@ -77,11 +184,11 @@ public class Susan {
             }
 
             if (myOpMode.gamepad2.dpad_up) {
-                innerServo.setPower(INNER_SERVO_SPEED);
-            } else if (myOpMode.gamepad2.dpad_down){
-                innerServo.setPower(-INNER_SERVO_SPEED);
+                innerMotor.setPower(INNER_MOTOR_SPEED);
+            } else if (myOpMode.gamepad2.dpad_down) {
+                innerMotor.setPower(-INNER_MOTOR_SPEED);
             } else if (myOpMode.gamepad2.dpad_left) {
-                innerServo.setPower(0);
+                innerMotor.setPower(0);
             }
         }
     }
@@ -95,7 +202,7 @@ public class Susan {
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
                     timer.reset();
-                    innerServo.setPower(INNER_SERVO_SPEED);
+                    innerMotor.setPower(INNER_MOTOR_SPEED);
                     initialized = true;
                 }
                 return timer.seconds() < 1;
@@ -115,7 +222,7 @@ public class Susan {
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
                     timer.reset();
-                    innerServo.setPower(0);
+                    innerMotor.setPower(0);
                     initialized = true;
                 }
                 return timer.seconds() < 1;

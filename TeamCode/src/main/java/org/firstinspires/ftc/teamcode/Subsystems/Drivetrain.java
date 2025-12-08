@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -30,24 +32,28 @@ public class Drivetrain {
     static final double COUNTS_PER_INCH = 50;
     ElapsedTime timeout = new ElapsedTime();
 
+    public String col = null;
+
     public Drivetrain(LinearOpMode opmode) {
         myOpMode = opmode;
     }
 
-    public void init() {
+    public void init(String colIn) {
+        col = colIn;
+        pinpoint = myOpMode.hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, Math.toRadians(0)));
+
         leftFrontDrive = myOpMode.hardwareMap.get(DcMotor.class, "leftFrontDrive");
         rightFrontDrive = myOpMode.hardwareMap.get(DcMotor.class, "rightFrontDrive");
         leftBackDrive = myOpMode.hardwareMap.get(DcMotor.class, "leftBackDrive");
         rightBackDrive = myOpMode.hardwareMap.get(DcMotor.class, "rightBackDrive");
         imu = myOpMode.hardwareMap.get(IMU.class, "imu");
 
-        pinpoint = myOpMode.hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
-
         // Configure the sensor
         configurePinpoint();
 
         // Set the location of the robot - this should be the place you are starting the robot from
-        pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
+        //pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
 
         leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -84,53 +90,63 @@ public class Drivetrain {
         myOpMode.telemetry.addData("Y coordinate (IN)", pose2D.getY(DistanceUnit.INCH));
         myOpMode.telemetry.addData("Heading angle (DEGREES)", pose2D.getHeading(AngleUnit.DEGREES));
 
-        double max;
-
         double frontLeftPower;
         double frontRightPower;
         double backLeftPower;
         double backRightPower;
 
-        double drive = -myOpMode.gamepad1.left_stick_y;
-        double turn = myOpMode.gamepad1.right_stick_x;
-        double strafe = -myOpMode.gamepad1.left_stick_x;
+        if (col.equals("red") || col.equals("blue")) {
 
-        double denominator = Math.max(Math.abs(drive) + Math.abs(strafe) + Math.abs(turn), 2);
+            if (myOpMode.gamepad1.dpad_up) {
+                pinpoint.resetPosAndIMU();
+            }
 
-        frontLeftPower = (drive + turn - strafe) / denominator;
-        frontRightPower = (drive - turn + strafe) / denominator;
-        backLeftPower = (drive + turn + strafe) / denominator;
-        backRightPower = (drive - turn - strafe) / denominator;
+            double y = -myOpMode.gamepad1.left_stick_y;
+            double x = myOpMode.gamepad1.left_stick_x;
+            double rx = myOpMode.gamepad1.right_stick_x;
 
-        // Normalize the values so no wheel power exceeds 100%
-        // This ensures that the robot maintains the desired motion.
-        max = Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower));
-        max = Math.max(max, Math.abs(backLeftPower));
-        max = Math.max(max, Math.abs(backRightPower));
+            double botHeading = pinpoint.getHeading(AngleUnit.RADIANS);
 
-        if (max > 1.0) {
-            frontLeftPower /= max;
-            frontRightPower /= max;
-            backLeftPower /= max;
-            backRightPower /= max;
-        }
+            double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
+            double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 
-        if (myOpMode.gamepad1.right_bumper) {
-            leftFrontDrive.setPower(frontLeftPower * 1.5);
-            rightFrontDrive.setPower(frontRightPower * 1.5);
-            leftBackDrive.setPower(backLeftPower * 1.5);
-            rightBackDrive.setPower(backRightPower * 1.5);
-        } else if (myOpMode.gamepad1.left_bumper) {
-            leftFrontDrive.setPower(frontLeftPower / 7);
-            rightFrontDrive.setPower(frontRightPower / 7);
-            leftBackDrive.setPower(backLeftPower / 7);
-            rightBackDrive.setPower(backRightPower / 7);
+            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+            frontLeftPower = (rotY + rotX + rx) / denominator;
+            backLeftPower = (rotY - rotX + rx) / denominator;
+            frontRightPower = (rotY - rotX - rx) / denominator;
+            backRightPower = (rotY + rotX - rx) / denominator;
         } else {
-            leftFrontDrive.setPower(frontLeftPower);
-            rightFrontDrive.setPower(frontRightPower);
-            leftBackDrive.setPower(backLeftPower);
-            rightBackDrive.setPower(backRightPower);
+            double max;
+
+            double drive = myOpMode.gamepad1.left_stick_y;
+            double turn = myOpMode.gamepad1.right_stick_x;
+            double strafe = myOpMode.gamepad1.left_stick_x;
+
+            double denominator = Math.max(Math.abs(drive) + Math.abs(strafe) + Math.abs(turn), 2);
+
+            frontLeftPower = (drive + turn - strafe) / denominator;
+            frontRightPower = (drive - turn + strafe) / denominator;
+            backLeftPower = (drive + turn + strafe) / denominator;
+            backRightPower = (drive - turn - strafe) / denominator;
+
+            // Normalize the values so no wheel power exceeds 100%
+            // This ensures that the robot maintains the desired motion.
+            max = Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower));
+            max = Math.max(max, Math.abs(backLeftPower));
+            max = Math.max(max, Math.abs(backRightPower));
+
+            if (max > 1.0) {
+                frontLeftPower /= max;
+                frontRightPower /= max;
+                backLeftPower /= max;
+                backRightPower /= max;
+            }
         }
+
+        leftFrontDrive.setPower(frontLeftPower * 1.3);
+        rightFrontDrive.setPower(frontRightPower * 1.3);
+        leftBackDrive.setPower(backLeftPower * 1.3);
+        rightBackDrive.setPower(backRightPower * 1.3);
     }
 
     public Action driveBack() {

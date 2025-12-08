@@ -169,7 +169,7 @@ public class Launcher {
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
                     timer.reset();
-                    spin.setPower(0.85);
+                    spin.setPower(0.8);
                     initialized = true;
                 }
                 return timer.seconds() < 2;

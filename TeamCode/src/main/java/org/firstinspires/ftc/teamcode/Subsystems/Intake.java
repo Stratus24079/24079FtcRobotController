@@ -17,7 +17,7 @@ public class Intake {
     }
 
     public IntakeMode intakeMode = IntakeMode.OFF;
-    public double INTAKE_SPEED = 1;
+    public double INTAKE_SPEED = 0.7;
 
     public Intake(LinearOpMode opmode) {
         myOpMode = opmode;

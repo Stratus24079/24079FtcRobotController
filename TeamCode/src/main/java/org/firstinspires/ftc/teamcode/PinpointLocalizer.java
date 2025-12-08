@@ -49,9 +49,7 @@ public final class PinpointLocalizer implements Localizer {
     }
 
     @Override
-    public void setPose(Pose2d pose) {
-        txWorldPinpoint = pose.times(txPinpointRobot.inverse());
-    }
+    public void setPose(Pose2d pose) { txWorldPinpoint = pose.times(txPinpointRobot.inverse()); }
 
     @Override
     public Pose2d getPose() {
