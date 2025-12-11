@@ -58,26 +58,23 @@ public class BallKicker {
         //TODO Update based on desired control scheme
     }
 
-    public Action kickBall() {
+    public Action ballKickerUp() {
         return new Action() {
-            ElapsedTime timer = new ElapsedTime();
-            private boolean initialized = false;
-
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    timer.reset();
-                    kicker.setPosition(UP_POSITION);
-                    initialized = true;
-                }
-                if (timer.seconds() < 2.5) {
-                    return true;
-                } else {
-                    kicker.setPosition(DOWN_POSITION);
-                    return false;
-                }
+                kicker.setPosition(UP_POSITION);
+                return false;
             }
         };
     }
 
+    public Action ballKickerDown() {
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                kicker.setPosition(DOWN_POSITION);
+                return false;
+            }
+        };
+    }
 }

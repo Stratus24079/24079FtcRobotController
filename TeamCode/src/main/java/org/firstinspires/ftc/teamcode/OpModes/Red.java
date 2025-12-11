@@ -18,7 +18,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @Autonomous
 public class Red extends LinearOpMode {
     private Follower follower;
-    private Paths myPaths;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -26,15 +25,15 @@ public class Red extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
 
-        myPaths = new Paths(follower);
+        Paths myPaths = new Paths(follower);
 
         waitForStart();
 
         if (isStopRequested()) return;
 
-        Actions.runBlocking(pedroDriveOnPathChain(myPaths.Shootpreload, 0.7, true));
-        Actions.runBlocking(pedroDriveOnPathChain(myPaths.Intake1st, 0.7, true));
-        Actions.runBlocking(pedroDriveOnPathChain(myPaths.Path3, 0.7, true));
+        Actions.runBlocking(pedroDriveOnPathChain(myPaths.ShootPreload, 0.7, true));
+        Actions.runBlocking(pedroDriveOnPathChain(myPaths.Intake1, 0.7, true));
+        Actions.runBlocking(pedroDriveOnPathChain(myPaths.Shoot1, 0.7, true));
     }
 
     private Action pedroDriveOnPathChain(PathChain targetPathChain, double maxPower, boolean holdPos) {
@@ -64,20 +63,20 @@ public class Red extends LinearOpMode {
 
     public static class Paths {
 
-        public PathChain Shootpreload;
-        public PathChain Intake1st;
-        public PathChain Path3;
+        public PathChain ShootPreload;
+        public PathChain Intake1;
+        public PathChain Shoot1;
 
         public Paths(Follower follower) {
-            Shootpreload = follower
+            ShootPreload = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(new Pose(111.000, 135.000), new Pose(88.000, 87.000))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(45))
+                    .setLinearHeadingInterpolation(0, Math.toRadians(45))
                     .build();
 
-            Intake1st = follower
+            Intake1 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(new Pose(88.000, 87.000), new Pose(104.685, 87.000))
@@ -85,7 +84,7 @@ public class Red extends LinearOpMode {
                     .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
                     .build();
 
-            Path3 = follower
+            Shoot1 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(new Pose(104.685, 87.000), new Pose(126.000, 87.000))

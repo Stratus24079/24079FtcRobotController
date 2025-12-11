@@ -31,9 +31,9 @@ public class AutoRedRight extends LinearOpMode {
                         robot.launcher.launcherOn(),
                         robot.susan.innerIntakeOn()
                 ),
-                robot.susan.ballKicker1.kickBall(),
-                robot.susan.ballKicker2.kickBall(),
-                robot.susan.ballKicker3.kickBall(),
+                robot.susan.ballKicker1.ballKickerUp(),
+                robot.susan.ballKicker2.ballKickerDown(),
+                robot.susan.ballKicker3.ballKickerUp(),
                 robot.launcher.launcherOff(),
                 robot.susan.innerIntakeOff()
         ));

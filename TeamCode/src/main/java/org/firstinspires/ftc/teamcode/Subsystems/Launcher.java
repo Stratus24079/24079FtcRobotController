@@ -162,45 +162,31 @@ public class Launcher {
 
     public Action launcherOn() {
         return new Action() {
-            ElapsedTime timer = new ElapsedTime();
             private boolean initialized = false;
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    timer.reset();
                     spin.setPower(0.8);
                     initialized = true;
                 }
-                return timer.seconds() < 2;
-                //double vel = spin.getVelocity();
-                //packet.put("shooterVelocity", vel);
-                //return vel < 10_000.0;
+                return spin.getVelocity() < TICKS_PER_SECOND;
             }
         };
     }
 
     public Action launcherOff() {
         return new Action() {
-            ElapsedTime timer = new ElapsedTime();
             private boolean initialized = false;
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    timer.reset();
-                    spin.setVelocity(0);
+                    spin.setPower(0);
                     initialized = true;
                 }
-                return timer.seconds() < 2;
-                //double vel = spin.getVelocity();
-                //packet.put("shooterVelocity", vel);
-                //return vel < 10_000.0;
+                return spin.getVelocity() > 0;
             }
         };
     }
-
-
-
-
 }

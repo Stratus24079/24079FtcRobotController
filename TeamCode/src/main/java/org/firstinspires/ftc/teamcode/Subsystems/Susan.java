@@ -195,37 +195,20 @@ public class Susan {
 
     public Action innerIntakeOn() {
         return new Action() {
-            ElapsedTime timer = new ElapsedTime();
-            private boolean initialized = false;
-
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    timer.reset();
-                    innerMotor.setPower(INNER_MOTOR_SPEED);
-                    initialized = true;
-                }
-                return timer.seconds() < 1;
-                //double vel = spin.getVelocity();
-                //packet.put("shooterVelocity", vel);
-                //return vel < 10_000.0;
+                innerMotor.setPower(INNER_MOTOR_SPEED);
+                return false;
             }
         };
     }
 
     public Action innerIntakeOff() {
         return new Action() {
-            ElapsedTime timer = new ElapsedTime();
-            private boolean initialized = false;
-
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    timer.reset();
-                    innerMotor.setPower(0);
-                    initialized = true;
-                }
-                return timer.seconds() < 1;
+                innerMotor.setPower(0);
+                return false;
             }
         };
     }
