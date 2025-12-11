@@ -90,57 +90,30 @@ public class Drivetrain {
         myOpMode.telemetry.addData("Y coordinate (IN)", pose2D.getY(DistanceUnit.INCH));
         myOpMode.telemetry.addData("Heading angle (DEGREES)", pose2D.getHeading(AngleUnit.DEGREES));
 
-        double frontLeftPower;
-        double frontRightPower;
-        double backLeftPower;
-        double backRightPower;
+        double max;
 
-        if (col.equals("red") || col.equals("blue")) {
+        double drive = -myOpMode.gamepad1.left_stick_y;
+        double turn = myOpMode.gamepad1.right_stick_x;
+        double strafe = -myOpMode.gamepad1.left_stick_x;
 
-            if (myOpMode.gamepad1.dpad_up) {
-                pinpoint.resetPosAndIMU();
-            }
+        double denominator = Math.max(Math.abs(drive) + Math.abs(strafe) + Math.abs(turn), 2);
 
-            double y = -myOpMode.gamepad1.left_stick_y;
-            double x = myOpMode.gamepad1.left_stick_x;
-            double rx = myOpMode.gamepad1.right_stick_x;
+        double frontLeftPower = (drive + turn - strafe) / denominator;
+        double frontRightPower = (drive - turn + strafe) / denominator;
+        double backLeftPower = (drive + turn + strafe) / denominator;
+        double backRightPower = (drive - turn - strafe) / denominator;
 
-            double botHeading = pinpoint.getHeading(AngleUnit.RADIANS);
+        // Normalize the values so no wheel power exceeds 100%
+        // This ensures that the robot maintains the desired motion.
+        max = Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower));
+        max = Math.max(max, Math.abs(backLeftPower));
+        max = Math.max(max, Math.abs(backRightPower));
 
-            double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-            double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-
-            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-            frontLeftPower = (rotY + rotX + rx) / denominator;
-            backLeftPower = (rotY - rotX + rx) / denominator;
-            frontRightPower = (rotY - rotX - rx) / denominator;
-            backRightPower = (rotY + rotX - rx) / denominator;
-        } else {
-            double max;
-
-            double drive = myOpMode.gamepad1.left_stick_y;
-            double turn = myOpMode.gamepad1.right_stick_x;
-            double strafe = myOpMode.gamepad1.left_stick_x;
-
-            double denominator = Math.max(Math.abs(drive) + Math.abs(strafe) + Math.abs(turn), 2);
-
-            frontLeftPower = (drive + turn - strafe) / denominator;
-            frontRightPower = (drive - turn + strafe) / denominator;
-            backLeftPower = (drive + turn + strafe) / denominator;
-            backRightPower = (drive - turn - strafe) / denominator;
-
-            // Normalize the values so no wheel power exceeds 100%
-            // This ensures that the robot maintains the desired motion.
-            max = Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower));
-            max = Math.max(max, Math.abs(backLeftPower));
-            max = Math.max(max, Math.abs(backRightPower));
-
-            if (max > 1.0) {
-                frontLeftPower /= max;
-                frontRightPower /= max;
-                backLeftPower /= max;
-                backRightPower /= max;
-            }
+        if (max > 1.0) {
+            frontLeftPower /= max;
+            frontRightPower /= max;
+            backLeftPower /= max;
+            backRightPower /= max;
         }
 
         leftFrontDrive.setPower(frontLeftPower * 1.3);
