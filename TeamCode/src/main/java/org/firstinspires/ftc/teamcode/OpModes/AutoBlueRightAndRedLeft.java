@@ -16,7 +16,7 @@ public class AutoBlueRightAndRedLeft extends LinearOpMode {
         //calling constructor
         robot = new RobotHardware(this);
         //calling init function
-        robot.init("red");
+        robot.init();
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Waiting for Start");
         telemetry.update();

@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.OpModes;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Subsystems.RobotHardware;
@@ -10,8 +12,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class TeleOp extends LinearOpMode {
 
     //declaring instance of robot hardware
-    //RobotHardware robot;
+    RobotHardware robot;
     private Follower follower;
+    public static Pose startingPose;
 
     enum DriveMode{
         ROBOT_CENTRIC,
@@ -22,21 +25,22 @@ public class TeleOp extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        //calling constructor
-       // robot = new RobotHardware(this);
-        //calling init function
-       // robot.init("norm");
-        // Wait for the game to start (driver presses START)
+        robot = new RobotHardware(this);
+        robot.init();
+
         follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
+        follower.startTeleopDrive(true);
         follower.update();
+
         telemetry.addData("Status", "Waiting for Start");
         telemetry.update();
         waitForStart();
-        follower.startTeleopDrive(true);
-
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            follower.update();
+
             if (gamepad1.dpad_up) {
                 driveMode = DriveMode.ROBOT_CENTRIC;
             } else if (gamepad1.dpad_left) {
@@ -45,7 +49,6 @@ public class TeleOp extends LinearOpMode {
                 driveMode = DriveMode.RED_FIELD_CENTRIC;
             }
 
-            follower.update();
             if (driveMode == DriveMode.ROBOT_CENTRIC) {
                 follower.setTeleOpDrive(
                         -gamepad1.left_stick_y,

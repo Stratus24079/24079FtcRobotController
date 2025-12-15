@@ -16,12 +16,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous
-public class Red extends LinearOpMode {
+public class RedFixedTurret extends LinearOpMode {
     private Follower follower;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Pose startPose = new Pose(111, 135, Math.toRadians(180));
+        Pose startPose = new Pose(111, 135, Math.toRadians(90));
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
 
@@ -32,8 +32,9 @@ public class Red extends LinearOpMode {
         if (isStopRequested()) return;
 
         Actions.runBlocking(pedroDriveOnPathChain(myPaths.ShootPreload, 0.7, true));
-        Actions.runBlocking(pedroDriveOnPathChain(myPaths.Intake1, 0.7, true));
-        Actions.runBlocking(pedroDriveOnPathChain(myPaths.Shoot1, 0.7, true));
+        Actions.runBlocking(pedroDriveOnPathChain(myPaths.ToIntake, 0.7, true));
+        Actions.runBlocking(pedroDriveOnPathChain(myPaths.Intake, 0.7, true));
+        Actions.runBlocking(pedroDriveOnPathChain(myPaths.Shoot, 0.7, true));
     }
 
     private Action pedroDriveOnPathChain(PathChain targetPathChain, double maxPower, boolean holdPos) {
@@ -64,34 +65,42 @@ public class Red extends LinearOpMode {
     public static class Paths {
 
         public PathChain ShootPreload;
-        public PathChain Intake1;
-        public PathChain Shoot1;
+        public PathChain ToIntake;
+        public PathChain Intake;
+        public PathChain Shoot;
 
         public Paths(Follower follower) {
             ShootPreload = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(111.000, 135.000), new Pose(82.000, 85.000))
+                            new BezierLine(new Pose(111.000, 135.000), new Pose(80.000, 85.000))
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(45))
+                    .build();
+
+            ToIntake = follower
+                    .pathBuilder()
+                    .addPath(
+                            new BezierLine(new Pose(80.000, 85.000), new Pose(100.000, 85.000))
+                    )
+                    .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(180))
+                    .build();
+
+            Intake = follower
+                    .pathBuilder()
+                    .addPath(
+                            new BezierLine(new Pose(100.000, 85.000), new Pose(130.000, 85.000))
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                     .build();
 
-            Intake1 = follower
+            Shoot = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(82.000, 85.000), new Pose(135.000, 85.000))
+                            new BezierLine(new Pose(130.000, 85.000), new Pose(80.000, 85.000))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
-                    .build();
-
-            Shoot1 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(135.000, 85.000), new Pose(82.000, 85.000))
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(45))
                     .build();
         }
     }
-
 }

@@ -38,8 +38,7 @@ public class Drivetrain {
         myOpMode = opmode;
     }
 
-    public void init(String colIn) {
-        col = colIn;
+    public void init() {
         pinpoint = myOpMode.hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, Math.toRadians(0)));
 

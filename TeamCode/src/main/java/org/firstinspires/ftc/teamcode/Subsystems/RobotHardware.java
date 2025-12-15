@@ -24,15 +24,13 @@ public class RobotHardware{
         myOpMode = opmode;
     }
 
-    public void init(String colIn) {
+    public void init() {
         drivetrain = new Drivetrain(myOpMode);
         intake = new Intake(myOpMode);
         launcher = new Launcher(myOpMode);
         susan = new Susan(myOpMode);
 
-        col = colIn;
-
-        drivetrain.init(col);
+        drivetrain.init();
         intake.init();
         launcher.init();
         susan.init();
