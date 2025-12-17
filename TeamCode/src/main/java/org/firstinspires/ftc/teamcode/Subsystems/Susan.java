@@ -80,8 +80,8 @@ public class Susan {
         }
 
         ballKicker1 = new BallKicker(myOpMode, "ballKicker1", 0.06, 0.16);
-        ballKicker2 = new BallKicker(myOpMode, "ballKicker2", 0.06, 0.16);
-        ballKicker3 = new BallKicker(myOpMode, "ballKicker3", 0.1, 0.2);
+        ballKicker2 = new BallKicker(myOpMode, "ballKicker2", 0.05, 0.15);
+        ballKicker3 = new BallKicker(myOpMode, "ballKicker3", 0.07, 0.17);
         innerMotor = myOpMode.hardwareMap.get(DcMotor.class, "innerIntake");
 
         innerMotor.setDirection(DcMotor.Direction.REVERSE);

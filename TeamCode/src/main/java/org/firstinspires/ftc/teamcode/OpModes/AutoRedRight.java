@@ -27,12 +27,12 @@ public class AutoRedRight extends LinearOpMode {
 
         Actions.runBlocking(new SequentialAction(
                 new ParallelAction(
-                        robot.drivetrain.driveBack(),
+                        //robot.drivetrain.driveBack(),
                         robot.launcher.launcherOn(),
                         robot.susan.innerIntakeOn()
                 ),
                 robot.susan.ballKicker1.ballKickerUp(),
-                robot.susan.ballKicker2.ballKickerDown(),
+                robot.susan.ballKicker2.ballKickerUp(),
                 robot.susan.ballKicker3.ballKickerUp(),
                 robot.launcher.launcherOff(),
                 robot.susan.innerIntakeOff()

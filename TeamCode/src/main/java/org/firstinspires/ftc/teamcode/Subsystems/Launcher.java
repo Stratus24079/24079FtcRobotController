@@ -21,19 +21,27 @@ import org.firstinspires.ftc.teamcode.utility.PIDController;
 import java.util.List;
 
 public class Launcher {
+    // pipeline
+    // 0 = obelisk
+    // 1 = Blue 2D
+    // 2 = Blue 3D
+    // 3 = Red 2D
+    // 4 = Red 3D
     private OpMode myOpMode = null;
-    private Limelight3A limelight;
+    public Limelight3A limelight;
     public DcMotorEx spin = null;
     public Servo hood = null;
     public CRServo turret = null;
     public PIDController turretPID = null;
 
-    public double FAR = 0.25;
+    public double FAR = 0.7;
     public double CLOSE = 1;
+    public double FARRPM = 5500;
+    public double CLOSERPM = 3500;
     public double revolutions_per_minute = 5000; //og: 5000
     public static final double TICKS_PER_REVOLUTION = 28;
     double TICKS_PER_SECOND = revolutions_per_minute / 60 * TICKS_PER_REVOLUTION;
-    public double turretKP = 0.02;
+    public double turretKP = 0.01;
     public double turretKI = 0;
     public double turretKD = 0;
 
@@ -63,7 +71,8 @@ public class Launcher {
 
     public void init(){
         spin = myOpMode.hardwareMap.get(DcMotorEx.class, "launcher");
-        spin.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        spin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spin.setDirection(DcMotor.Direction.REVERSE);
 
         hood = myOpMode.hardwareMap.get(Servo.class, "hood");
@@ -76,7 +85,7 @@ public class Launcher {
 
         limelight = myOpMode.hardwareMap.get(Limelight3A.class, "limelight");
 
-        limelight.pipelineSwitch(1);
+        limelight.pipelineSwitch(0);
 
         /*
          * Starts polling for data.  If you neglect to call start(), getLatestResult() will return null.
@@ -85,6 +94,8 @@ public class Launcher {
     }
 
     public void update(){
+        TICKS_PER_SECOND = (revolutions_per_minute / 60) * TICKS_PER_REVOLUTION;
+
         if (launcherMode == LauncherMode.ON) {
             spin.setVelocity(TICKS_PER_SECOND);
         } else if(launcherMode == LauncherMode.OFF) {
@@ -93,8 +104,10 @@ public class Launcher {
 
         if (hoodMode == HoodMode.FAR) {
             hood.setPosition(FAR);
+            revolutions_per_minute = FARRPM;
         } else if(hoodMode == HoodMode.CLOSE) {
             hood.setPosition(CLOSE);
+            revolutions_per_minute = CLOSERPM;
         }
 
         if(turretMode == TurretMode.MANUAL) {
@@ -132,9 +145,13 @@ public class Launcher {
             } else {
                 myOpMode.telemetry.addData("Limelight", "No data available");
             }
-
+            double turretError = Math.abs(result.getTx());
             double turretPower = turretPID.calculate(0, result.getTx());
-            turret.setPower(-turretPower);
+            myOpMode.telemetry.addData("turretPower", turretPower);
+
+            if (turretError > 3) {
+                turret.setPower(-turretPower);
+            }
         }
     }
 
@@ -154,10 +171,18 @@ public class Launcher {
         if(Math.abs(myOpMode.gamepad2.right_stick_x) > 0.5) {
             turretMode = TurretMode.MANUAL;
         }
-        if(myOpMode.gamepad1.right_bumper){
+        if(myOpMode.gamepad2.right_trigger > 0.5){
             turretMode = TurretMode.AUTO;
         }
+
+        double measuredRPM = spin.getVelocity() * 60 / TICKS_PER_REVOLUTION;
         myOpMode.telemetry.addData("turret mode", turretMode);
+        myOpMode.telemetry.addData("spinVelocity", spin.getVelocity());
+        myOpMode.telemetry.addData("hood mode", hoodMode);
+        myOpMode.telemetry.addData("targetRPM", revolutions_per_minute);
+        myOpMode.telemetry.addData("measuredRPM", measuredRPM);
+
+
     }
 
     public Action launcherOn() {
@@ -170,6 +195,7 @@ public class Launcher {
                     spin.setPower(0.8);
                     initialized = true;
                 }
+                packet.put("ticks per second", spin.getCurrentPosition());
                 return spin.getVelocity() < TICKS_PER_SECOND;
             }
         };

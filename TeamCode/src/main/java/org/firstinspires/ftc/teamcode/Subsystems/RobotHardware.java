@@ -25,12 +25,12 @@ public class RobotHardware{
     }
 
     public void init() {
-        drivetrain = new Drivetrain(myOpMode);
+        //drivetrain = new Drivetrain(myOpMode);
         intake = new Intake(myOpMode);
         launcher = new Launcher(myOpMode);
         susan = new Susan(myOpMode);
 
-        drivetrain.init();
+        //drivetrain.init();
         intake.init();
         launcher.init();
         susan.init();
@@ -39,7 +39,7 @@ public class RobotHardware{
     }
 
     public void teleOp() {
-        drivetrain.teleOp();
+        //drivetrain.teleOp();
         intake.teleOp();
         launcher.teleOp();
         susan.teleOp();
