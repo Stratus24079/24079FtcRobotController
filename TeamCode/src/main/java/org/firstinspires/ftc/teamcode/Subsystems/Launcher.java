@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import static java.lang.Math.abs;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -30,14 +32,16 @@ public class Launcher {
     private OpMode myOpMode = null;
     public Limelight3A limelight;
     public DcMotorEx spin = null;
+    public DcMotorEx spin2 = null;
     public Servo hood = null;
     public CRServo turret = null;
     public PIDController turretPID = null;
 
     public double FAR = 0.7;
     public double CLOSE = 1;
-    public double FARRPM = 5500;
-    public double CLOSERPM = 3500;
+    public double FARRPM = -5500;
+    public double CLOSERPM = -3800;
+    public static double AUTO_RPM = -4000;
     public double revolutions_per_minute = 5000; //og: 5000
     public static final double TICKS_PER_REVOLUTION = 28;
     double TICKS_PER_SECOND = revolutions_per_minute / 60 * TICKS_PER_REVOLUTION;
@@ -75,6 +79,11 @@ public class Launcher {
         spin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spin.setDirection(DcMotor.Direction.REVERSE);
 
+        spin2 = myOpMode.hardwareMap.get(DcMotorEx.class, "launcher2");
+        spin2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spin2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        spin2.setDirection(DcMotor.Direction.REVERSE);
+
         hood = myOpMode.hardwareMap.get(Servo.class, "hood");
         hood.setPosition(CLOSE);
 
@@ -98,8 +107,10 @@ public class Launcher {
 
         if (launcherMode == LauncherMode.ON) {
             spin.setVelocity(TICKS_PER_SECOND);
+            spin2.setVelocity(TICKS_PER_SECOND);
         } else if(launcherMode == LauncherMode.OFF) {
             spin.setVelocity(0);
+            spin2.setVelocity(0);
         }
 
         if (hoodMode == HoodMode.FAR) {
@@ -107,14 +118,12 @@ public class Launcher {
             revolutions_per_minute = FARRPM;
         } else if(hoodMode == HoodMode.CLOSE) {
             hood.setPosition(CLOSE);
-            revolutions_per_minute = CLOSERPM;
+            revolutions_per_minute =  CLOSERPM;
         }
 
         if(turretMode == TurretMode.MANUAL) {
             turret.setPower(myOpMode.gamepad2.right_stick_x);
         } else if (turretMode == TurretMode.AUTO) {
-
-
             LLResult result = limelight.getLatestResult();
             if (result.isValid()) {
                 // Access general information
@@ -145,7 +154,7 @@ public class Launcher {
             } else {
                 myOpMode.telemetry.addData("Limelight", "No data available");
             }
-            double turretError = Math.abs(result.getTx());
+            double turretError = abs(result.getTx());
             double turretPower = turretPID.calculate(0, result.getTx());
             myOpMode.telemetry.addData("turretPower", turretPower);
 
@@ -168,7 +177,7 @@ public class Launcher {
         } else if(myOpMode.gamepad1.b) {
             hoodMode = HoodMode.CLOSE;
         }
-        if(Math.abs(myOpMode.gamepad2.right_stick_x) > 0.5) {
+        if(abs(myOpMode.gamepad2.right_stick_x) > 0.5) {
             turretMode = TurretMode.MANUAL;
         }
         if(myOpMode.gamepad2.right_trigger > 0.5){
@@ -176,11 +185,14 @@ public class Launcher {
         }
 
         double measuredRPM = spin.getVelocity() * 60 / TICKS_PER_REVOLUTION;
+        double measuredRPM2 = spin2.getVelocity() * 60 / TICKS_PER_REVOLUTION;
         myOpMode.telemetry.addData("turret mode", turretMode);
-        myOpMode.telemetry.addData("spinVelocity", spin.getVelocity());
+        myOpMode.telemetry.addData("turret pos", turret.getDirection().ordinal());
+        myOpMode.telemetry.addData("spinVelocity", spin2.getVelocity());
         myOpMode.telemetry.addData("hood mode", hoodMode);
         myOpMode.telemetry.addData("targetRPM", revolutions_per_minute);
         myOpMode.telemetry.addData("measuredRPM", measuredRPM);
+        myOpMode.telemetry.addData("measuredRPM2", measuredRPM2);
 
 
     }
@@ -192,11 +204,20 @@ public class Launcher {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    spin.setPower(0.8);
+                    TICKS_PER_SECOND = (AUTO_RPM / 60) * TICKS_PER_REVOLUTION;
+                    spin.setVelocity(TICKS_PER_SECOND);
+                    spin2.setVelocity(TICKS_PER_SECOND);
                     initialized = true;
                 }
-                packet.put("ticks per second", spin.getCurrentPosition());
+                double measuredRPM = spin.getVelocity() * 60 / TICKS_PER_REVOLUTION;
+                myOpMode.telemetry.addData("measuredRPM", measuredRPM);
+                myOpMode.telemetry.addData("ticks per second", spin2.getVelocity());
                 return spin.getVelocity() < TICKS_PER_SECOND;
+
+                double measuredRPM2 = spin2.getVelocity() * 60 / TICKS_PER_REVOLUTION;
+                myOpMode.telemetry.addData("measuredRPM2", measuredRPM2);
+                myOpMode.telemetry.addData("ticks per second", spin2.getVelocity());
+                return spin2.getVelocity() < TICKS_PER_SECOND;
             }
         };
     }
@@ -208,10 +229,12 @@ public class Launcher {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    spin.setPower(0);
+                    spin.setVelocity(0);
+                    spin2.setVelocity(0);
                     initialized = true;
                 }
                 return spin.getVelocity() > 0;
+                return spin2.getVelocity() > 0;
             }
         };
     }

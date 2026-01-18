@@ -21,7 +21,7 @@ public class Intake {
     }
 
     public IntakeMode intakeMode = IntakeMode.OFF;
-    public double INTAKE_SPEED = 0.7;
+    public double INTAKE_SPEED = -0.7;
 
     public Intake(LinearOpMode opmode) {
         myOpMode = opmode;
@@ -47,9 +47,9 @@ public class Intake {
         update();
 
         if (myOpMode.gamepad2.left_bumper) {
-            intakeMode = IntakeMode.IN;
-        } else if (myOpMode.gamepad2.right_bumper) {
             intakeMode = IntakeMode.OUT;
+        } else if (myOpMode.gamepad2.right_bumper) {
+            intakeMode = IntakeMode.IN;
         } else {
             intakeMode = IntakeMode.OFF;
         }

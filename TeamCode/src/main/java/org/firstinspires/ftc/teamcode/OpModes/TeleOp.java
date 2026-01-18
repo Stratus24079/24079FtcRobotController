@@ -55,8 +55,8 @@ public class TeleOp extends LinearOpMode {
 
             if (driveMode == DriveMode.ROBOT_CENTRIC) {
                 follower.setTeleOpDrive(
-                        -gamepad1.left_stick_y * speedMultiplier,
-                        -gamepad1.left_stick_x * speedMultiplier,
+                        gamepad1.left_stick_y * speedMultiplier,
+                        gamepad1.left_stick_x * speedMultiplier,
                         -gamepad1.right_stick_x * speedMultiplier
                 );
             } else if (driveMode == DriveMode.BLUE_FIELD_CENTRIC) {

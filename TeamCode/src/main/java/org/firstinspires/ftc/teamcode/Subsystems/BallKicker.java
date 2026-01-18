@@ -70,7 +70,7 @@ public class BallKicker {
                     kicker.setPosition(UP_POSITION);
                     initialized = true;
                 }
-                if (timer.seconds() < 2.5) {
+                if (timer.seconds() < 2) {
                     return true;
                 } else {
                     kicker.setPosition(DOWN_POSITION);
