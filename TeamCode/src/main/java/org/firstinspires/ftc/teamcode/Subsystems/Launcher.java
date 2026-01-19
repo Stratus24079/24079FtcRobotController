@@ -39,9 +39,9 @@ public class Launcher {
 
     public double FAR = 0.7;
     public double CLOSE = 1;
-    public double FARRPM = -5500;
-    public double CLOSERPM = -3800;
-    public static double AUTO_RPM = -4000;
+    public double FARRPM = 5500;
+    public double CLOSERPM = 3800;
+    public static double AUTO_RPM = 4000;
     public double revolutions_per_minute = 5000; //og: 5000
     public static final double TICKS_PER_REVOLUTION = 28;
     double TICKS_PER_SECOND = revolutions_per_minute / 60 * TICKS_PER_REVOLUTION;
@@ -184,14 +184,12 @@ public class Launcher {
             turretMode = TurretMode.AUTO;
         }
 
-        double measuredRPM = spin.getVelocity() * 60 / TICKS_PER_REVOLUTION;
         double measuredRPM2 = spin2.getVelocity() * 60 / TICKS_PER_REVOLUTION;
         myOpMode.telemetry.addData("turret mode", turretMode);
         myOpMode.telemetry.addData("turret pos", turret.getDirection().ordinal());
-        myOpMode.telemetry.addData("spinVelocity", spin2.getVelocity());
+        myOpMode.telemetry.addData("spin2Velocity", spin2.getVelocity());
         myOpMode.telemetry.addData("hood mode", hoodMode);
         myOpMode.telemetry.addData("targetRPM", revolutions_per_minute);
-        myOpMode.telemetry.addData("measuredRPM", measuredRPM);
         myOpMode.telemetry.addData("measuredRPM2", measuredRPM2);
 
 
@@ -209,10 +207,6 @@ public class Launcher {
                     spin2.setVelocity(TICKS_PER_SECOND);
                     initialized = true;
                 }
-                double measuredRPM = spin.getVelocity() * 60 / TICKS_PER_REVOLUTION;
-                myOpMode.telemetry.addData("measuredRPM", measuredRPM);
-                myOpMode.telemetry.addData("ticks per second", spin2.getVelocity());
-                return spin.getVelocity() < TICKS_PER_SECOND;
 
                 double measuredRPM2 = spin2.getVelocity() * 60 / TICKS_PER_REVOLUTION;
                 myOpMode.telemetry.addData("measuredRPM2", measuredRPM2);
@@ -233,7 +227,6 @@ public class Launcher {
                     spin2.setVelocity(0);
                     initialized = true;
                 }
-                return spin.getVelocity() > 0;
                 return spin2.getVelocity() > 0;
             }
         };
