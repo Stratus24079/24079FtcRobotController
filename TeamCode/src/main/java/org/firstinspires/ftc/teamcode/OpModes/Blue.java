@@ -16,13 +16,19 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Subsystems.BallKicker;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotHardware;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+
+import java.util.ArrayList;
 
 @Autonomous
 public class Blue extends LinearOpMode {
     private Follower follower;
     private RobotHardware robot;
+
+    int[] order1 = new int[]{2 ,1, 0};
+    int[] order2 = new int[]{0, 1, 2};
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -41,14 +47,18 @@ public class Blue extends LinearOpMode {
 
         Actions.runBlocking(new SequentialAction(
                 pedroDriveOnPathChain(myPaths.ReadMotif, 1, true),
+                robot.launcher.scanMotif(),
+                findOrder(),
                 new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.ShootPreload, 1, true),
+                        pedroDriveOnPathChain(myPaths.ShootPreload, 1.2, true),
                         robot.launcher.launcherOn(),
                         robot.susan.innerIntakeOn()
                 ),
-                robot.susan.ballKicker1.ballKickerUp(),
-                robot.susan.ballKicker2.ballKickerUp(),
-                robot.susan.ballKicker3.ballKickerUp(),
+
+                robot.susan.ballKickers[order1[0]].ballKickerUp(),
+                robot.susan.ballKickers[order1[1]].ballKickerUp(),
+                robot.susan.ballKickers[order1[2]].ballKickerUp(),
+
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Intake1, 0.5, true),
                         robot.intake.intakeOn(),
@@ -61,9 +71,9 @@ public class Blue extends LinearOpMode {
                         robot.susan.innerIntakeOn()
                 ),
                 robot.intake.intakeOff(),
-                robot.susan.ballKicker1.ballKickerUp(),
-                robot.susan.ballKicker2.ballKickerUp(),
-                robot.susan.ballKicker3.ballKickerUp(),
+                robot.susan.ballKickers[order1[0]].ballKickerUp(),
+                robot.susan.ballKickers[order1[1]].ballKickerUp(),
+                robot.susan.ballKickers[order1[2]].ballKickerUp(),
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Intake2, 0.5, true),
                         robot.intake.intakeOn(),
@@ -76,12 +86,96 @@ public class Blue extends LinearOpMode {
                     robot.susan.innerIntakeOn()
                 ),
                 robot.intake.intakeOff(),
-                robot.susan.ballKicker1.ballKickerUp(),
-                robot.susan.ballKicker2.ballKickerUp(),
-                robot.susan.ballKicker3.ballKickerUp(),
-                robot.launcher.launcherOff()
+                robot.susan.ballKickers[order2[0]].ballKickerUp(),
+                robot.susan.ballKickers[order2[1]].ballKickerUp(),
+                robot.susan.ballKickers[order2[2]].ballKickerUp(),
+
+                new ParallelAction(
+                        pedroDriveOnPathChain(myPaths.LeaveShooting, 1,true),
+                        robot.launcher.launcherOff(),
+                        robot.susan.innerIntakeOff()
+                )
 
         ));
+    }
+
+    public Action fireInOrder1() {
+        return new Action() {
+            private boolean initialized = false;
+            ElapsedTime timer = new ElapsedTime();
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+
+                if (!initialized) {
+                    timer.reset();
+                    initialized = true;
+                }
+
+                for (int i = 0; i < 3; i++) {
+                    if (order1[i] == 1) robot.susan.ballKickers[0].ballKickerUp().run(packet);
+                    else if (order1[i] == 2) robot.susan.ballKickers[1].ballKickerUp().run(packet);
+                    else if (order1[i] == 3) robot.susan.ballKickers[2].ballKickerUp().run(packet);
+                }
+                return timer.seconds() < 2.5;
+            }
+        };
+    }
+
+    public Action fireInOrder2() {
+        return new Action() {
+
+            ElapsedTime timer = new ElapsedTime();
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                for (int i = 0; i < 3; i++) {
+                    if (order2[i] == 1) robot.susan.ballKickers[0].ballKickerUp().run(packet);
+                    else if (order2[i] == 2) robot.susan.ballKickers[1].ballKickerUp().run(packet);
+                    else if (order2[i] == 3) robot.susan.ballKickers[2].ballKickerUp().run(packet);
+                }
+                return timer.seconds() < 0.5;
+            }
+        };
+    }
+
+    public Action findOrder() {
+        return new Action() {
+            private boolean initialized = false;
+            ElapsedTime timer = new ElapsedTime();
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    initialized = true;
+                    timer.reset();
+                }
+
+                if (robot.launcher.id == 21) {
+                    order1 = new int[]{0, 1, 2};
+                    order2 = new int[]{1, 2, 0};
+                } else if (robot.launcher.id == 22) {
+                    order1 = new int[]{1, 0, 2};
+                    order2 = new int[]{0, 1, 2};
+                } else if (robot.launcher.id == 23) {
+                    order1 = new int[]{2, 1, 0};
+                    order2 = new int[]{0, 2, 1};
+                }
+
+                telemetry.addData("id", robot.launcher.id);
+                telemetry.addData("order1", order1[0]);
+                telemetry.addData("order1", order1[1]);
+                telemetry.addData("order1", order1[2]);
+
+                telemetry.addData("order2", order2[0]);
+                telemetry.addData("order2", order2[1]);
+                telemetry.addData("order2", order2[2]);
+
+                telemetry.update();
+
+                return timer.seconds() < 2;
+            }
+        };
     }
 
     private Action pedroDriveOnPathChain(PathChain targetPathChain, double maxPower, boolean holdPos) {
@@ -101,6 +195,13 @@ public class Blue extends LinearOpMode {
                 telemetry.addData("x", follower.getPose().getX());
                 telemetry.addData("y", follower.getPose().getY());
                 telemetry.addData("heading", follower.getPose().getHeading());
+                telemetry.addData("order1", order1[0]);
+                telemetry.addData("order1", order1[1]);
+                telemetry.addData("order1", order1[2]);
+
+                telemetry.addData("order2", order2[0]);
+                telemetry.addData("order2", order2[1]);
+                telemetry.addData("order2", order2[2]);
 
                 telemetry.update();
 
@@ -125,7 +226,7 @@ public class Blue extends LinearOpMode {
                     .addPath(
                             new BezierLine(new Pose(34.000, 135.000), new Pose(55.000, 126.000))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(315))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(230))
                     .build();
 
             ShootPreload = follower
@@ -133,7 +234,7 @@ public class Blue extends LinearOpMode {
                     .addPath(
                             new BezierLine(new Pose(55.000, 126.000), new Pose(55.000, 89.000))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(305))
+                    .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(305))
                     .build();
 
             Intake1 = follower

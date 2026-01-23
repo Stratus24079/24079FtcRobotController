@@ -20,6 +20,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.utility.PIDController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Launcher {
@@ -31,7 +32,7 @@ public class Launcher {
     // 4 = Red 3D
     private OpMode myOpMode = null;
     public Limelight3A limelight;
-    public DcMotorEx spin = null;
+    public DcMotorEx spin1 = null;
     public DcMotorEx spin2 = null;
     public Servo hood = null;
     public CRServo turret = null;
@@ -48,6 +49,8 @@ public class Launcher {
     public double turretKP = 0.01;
     public double turretKI = 0;
     public double turretKD = 0;
+    public int id = 21;
+
 
     public enum LauncherMode {
         ON,
@@ -74,15 +77,15 @@ public class Launcher {
     }
 
     public void init(){
-        spin = myOpMode.hardwareMap.get(DcMotorEx.class, "launcher");
-        spin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        spin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        spin.setDirection(DcMotor.Direction.REVERSE);
+        spin1 = myOpMode.hardwareMap.get(DcMotorEx.class, "launcher");
+        spin1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spin1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        spin1.setDirection(DcMotor.Direction.REVERSE);
 
         spin2 = myOpMode.hardwareMap.get(DcMotorEx.class, "launcher2");
         spin2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spin2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        spin2.setDirection(DcMotor.Direction.REVERSE);
+        //spin2.setDirection(DcMotor.Direction.REVERSE);
 
         hood = myOpMode.hardwareMap.get(Servo.class, "hood");
         hood.setPosition(CLOSE);
@@ -106,10 +109,10 @@ public class Launcher {
         TICKS_PER_SECOND = (revolutions_per_minute / 60) * TICKS_PER_REVOLUTION;
 
         if (launcherMode == LauncherMode.ON) {
-            spin.setVelocity(TICKS_PER_SECOND);
+            spin1.setVelocity(TICKS_PER_SECOND);
             spin2.setVelocity(TICKS_PER_SECOND);
         } else if(launcherMode == LauncherMode.OFF) {
-            spin.setVelocity(0);
+            spin1.setVelocity(0);
             spin2.setVelocity(0);
         }
 
@@ -184,12 +187,14 @@ public class Launcher {
             turretMode = TurretMode.AUTO;
         }
 
+        double measuredRPM = spin1.getVelocity() * 60 / TICKS_PER_REVOLUTION;
         double measuredRPM2 = spin2.getVelocity() * 60 / TICKS_PER_REVOLUTION;
         myOpMode.telemetry.addData("turret mode", turretMode);
         myOpMode.telemetry.addData("turret pos", turret.getDirection().ordinal());
-        myOpMode.telemetry.addData("spin2Velocity", spin2.getVelocity());
+        myOpMode.telemetry.addData("spin1Velocity", spin1.getVelocity());
         myOpMode.telemetry.addData("hood mode", hoodMode);
         myOpMode.telemetry.addData("targetRPM", revolutions_per_minute);
+        myOpMode.telemetry.addData("measuredRPM", measuredRPM);
         myOpMode.telemetry.addData("measuredRPM2", measuredRPM2);
 
 
@@ -203,15 +208,15 @@ public class Launcher {
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
                     TICKS_PER_SECOND = (AUTO_RPM / 60) * TICKS_PER_REVOLUTION;
-                    spin.setVelocity(TICKS_PER_SECOND);
+                    spin1.setVelocity(TICKS_PER_SECOND);
                     spin2.setVelocity(TICKS_PER_SECOND);
                     initialized = true;
                 }
 
-                double measuredRPM2 = spin2.getVelocity() * 60 / TICKS_PER_REVOLUTION;
-                myOpMode.telemetry.addData("measuredRPM2", measuredRPM2);
-                myOpMode.telemetry.addData("ticks per second", spin2.getVelocity());
-                return spin2.getVelocity() < TICKS_PER_SECOND;
+                double measuredRPM = spin1.getVelocity() * 60 / TICKS_PER_REVOLUTION;
+                myOpMode.telemetry.addData("measuredRPM2", measuredRPM);
+                myOpMode.telemetry.addData("ticks per second", spin1.getVelocity());
+                return spin1.getVelocity() < TICKS_PER_SECOND;
             }
         };
     }
@@ -223,12 +228,45 @@ public class Launcher {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    spin.setVelocity(0);
+                    spin1.setVelocity(0);
                     spin2.setVelocity(0);
                     initialized = true;
                 }
-                return spin2.getVelocity() > 0;
+                return spin1.getVelocity() > 0;
+            }
+        };
+    }
+
+    public Action scanMotif() {
+        return new Action() {
+            private boolean initialized = false;
+            ElapsedTime timer = new ElapsedTime();
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    timer.reset();
+                    initialized = true;
+                }
+
+                LLResult result = limelight.getLatestResult();
+                if (result.isValid()) {
+                    // Access general information
+                    // Access barcode results
+
+                    // Access fiducial results
+                    List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
+                    for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                        myOpMode.telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
+                        id = fr.getFiducialId();
+                    }
+                }
+
+                myOpMode.telemetry.addData("id", id);
+                myOpMode.telemetry.update();
+                return timer.seconds() < 2;
             }
         };
     }
 }
+

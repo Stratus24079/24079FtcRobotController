@@ -27,6 +27,8 @@ public class BallKicker {
     public double DOWN_POSITION = 0;
     public String SERVO_NAME = "";
     public KickerMode kickerMode = KickerMode.KICKER_DOWN;
+    public ElapsedTime timer = new ElapsedTime();
+    private boolean initialized = false;
 
     //Constructor
     public BallKicker(LinearOpMode opmode, String servoName, double upIn, double downIn) {
@@ -58,6 +60,9 @@ public class BallKicker {
         //TODO Update based on desired control scheme
     }
 
+    public void ballKickerAuto(){
+
+    }
     public Action ballKickerUp() {
         return new Action() {
             ElapsedTime timer = new ElapsedTime();
@@ -70,7 +75,7 @@ public class BallKicker {
                     kicker.setPosition(UP_POSITION);
                     initialized = true;
                 }
-                if (timer.seconds() < 2) {
+                if (timer.seconds() < 0.7) {
                     return true;
                 } else {
                     kicker.setPosition(DOWN_POSITION);

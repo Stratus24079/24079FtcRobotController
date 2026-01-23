@@ -34,9 +34,7 @@ public class Susan {
     final float[] hsvValues2 = new float[3];
     final float[] hsvValues3 = new float[3];
     float gain = 15;
-    public BallKicker ballKicker1 = null;
-    public BallKicker ballKicker2 = null;
-    public BallKicker ballKicker3 = null;
+    public BallKicker[] ballKickers = null;
     public DcMotor innerMotor = null;
 
     //TODO Adjust based on desired states
@@ -79,25 +77,25 @@ public class Susan {
             ((SwitchableLight)colorSensor3).enableLight(true);
         }
 
-        ballKicker1 = new BallKicker(myOpMode, "ballKicker1", 0.06, 0.16);
-        ballKicker2 = new BallKicker(myOpMode, "ballKicker2", 0.05, 0.15);
-        ballKicker3 = new BallKicker(myOpMode, "ballKicker3", 0.07, 0.17);
+        ballKickers = new BallKicker[] {
+                new BallKicker(myOpMode, "ballKicker1", 0.06, 0.16),
+                new BallKicker(myOpMode, "ballKicker2", 0.05, 0.15),
+                new BallKicker(myOpMode, "ballKicker3", 0.07, 0.17)
+        };
         innerMotor = myOpMode.hardwareMap.get(DcMotor.class, "innerIntake");
 
         innerMotor.setDirection(DcMotor.Direction.REVERSE);
 
-        ballKicker1.init();
-        ballKicker2.init();
-        ballKicker3.init();
+        for (BallKicker b : ballKickers) b.init();
 
         myOpMode.telemetry.addData(">", "Susan Initialized");
     }
 
     public void update() {
         myOpMode.telemetry.addData("susanMode", susanMode);
-        ballKicker1.update();
-        ballKicker2.update();
-        ballKicker3.update();
+
+        for (BallKicker b : ballKickers) b.update();
+
         RGBLight();
         myOpMode.telemetry.addData("rgb1", hsvValues1[0]);
         myOpMode.telemetry.addData("distance1", ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM));
@@ -168,19 +166,19 @@ public class Susan {
         //Set states based on gamepad presses
         if (susanMode == SusanMode.MANUAL) {
             if (myOpMode.gamepad2.x) {
-                ballKicker1.kickerMode = BallKicker.KickerMode.KICKER_UP;
+                ballKickers[0].kickerMode = BallKicker.KickerMode.KICKER_UP;
             } else {
-                ballKicker1.kickerMode = BallKicker.KickerMode.KICKER_DOWN;
+                ballKickers[0].kickerMode = BallKicker.KickerMode.KICKER_DOWN;
             }
             if (myOpMode.gamepad2.y) {
-                ballKicker2.kickerMode = BallKicker.KickerMode.KICKER_UP;
+                ballKickers[1].kickerMode = BallKicker.KickerMode.KICKER_UP;
             } else {
-                ballKicker2.kickerMode = BallKicker.KickerMode.KICKER_DOWN;
+                ballKickers[1].kickerMode = BallKicker.KickerMode.KICKER_DOWN;
             }
             if (myOpMode.gamepad2.b) {
-                ballKicker3.kickerMode = BallKicker.KickerMode.KICKER_UP;
+                ballKickers[2].kickerMode = BallKicker.KickerMode.KICKER_UP;
             } else {
-                ballKicker3.kickerMode = BallKicker.KickerMode.KICKER_DOWN;
+                ballKickers[2].kickerMode = BallKicker.KickerMode.KICKER_DOWN;
             }
 
             if (myOpMode.gamepad2.dpad_up) {

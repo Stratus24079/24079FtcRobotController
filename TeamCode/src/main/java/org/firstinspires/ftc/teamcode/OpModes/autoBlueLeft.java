@@ -31,9 +31,7 @@ public class autoBlueLeft extends LinearOpMode {
                         robot.launcher.launcherOn(),
                         robot.susan.innerIntakeOn()
                 ),
-                robot.susan.ballKicker1.ballKickerUp(),
-                robot.susan.ballKicker2.ballKickerUp(),
-                robot.susan.ballKicker3.ballKickerUp(),
+
                 robot.launcher.launcherOff(),
                 robot.susan.innerIntakeOff()
         ));

@@ -46,11 +46,11 @@ public class TeleOp extends LinearOpMode {
             if (gamepad1.dpad_up) {
                 driveMode = DriveMode.ROBOT_CENTRIC;
             } else if (gamepad1.dpad_left) {
-                driveMode = DriveMode.BLUE_FIELD_CENTRIC;
+               // driveMode = DriveMode.BLUE_FIELD_CENTRIC;
                 robot.launcher.limelight.pipelineSwitch(1);
             } else if (gamepad1.dpad_right) {
                 robot.launcher.limelight.pipelineSwitch(3);
-                driveMode = DriveMode.RED_FIELD_CENTRIC;
+               // driveMode = DriveMode.RED_FIELD_CENTRIC;
             }
 
             if (driveMode == DriveMode.ROBOT_CENTRIC) {
