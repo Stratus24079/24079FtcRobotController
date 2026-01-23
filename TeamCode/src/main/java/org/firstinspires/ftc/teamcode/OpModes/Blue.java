@@ -55,9 +55,12 @@ public class Blue extends LinearOpMode {
                         robot.susan.innerIntakeOn()
                 ),
 
-                robot.susan.ballKickers[order1[0]].ballKickerUp(),
-                robot.susan.ballKickers[order1[1]].ballKickerUp(),
-                robot.susan.ballKickers[order1[2]].ballKickerUp(),
+                //robot.susan.ballKickers[order1[0]].ballKickerUp(),
+                //robot.susan.ballKickers[order1[1]].ballKickerUp(),
+                //robot.susan.ballKickers[order1[2]].ballKickerUp(),
+                kickOrder1(0),
+                kickOrder1(1),
+                kickOrder1(2),
 
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Intake1, 0.5, true),
@@ -71,9 +74,13 @@ public class Blue extends LinearOpMode {
                         robot.susan.innerIntakeOn()
                 ),
                 robot.intake.intakeOff(),
-                robot.susan.ballKickers[order1[0]].ballKickerUp(),
-                robot.susan.ballKickers[order1[1]].ballKickerUp(),
-                robot.susan.ballKickers[order1[2]].ballKickerUp(),
+
+                kickOrder1(0),
+                kickOrder1(1),
+                kickOrder1(2),
+                //robot.susan.ballKickers[order1[0]].ballKickerUp(),
+                //robot.susan.ballKickers[order1[1]].ballKickerUp(),
+                //robot.susan.ballKickers[order1[2]].ballKickerUp(),
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Intake2, 0.5, true),
                         robot.intake.intakeOn(),
@@ -86,9 +93,12 @@ public class Blue extends LinearOpMode {
                     robot.susan.innerIntakeOn()
                 ),
                 robot.intake.intakeOff(),
-                robot.susan.ballKickers[order2[0]].ballKickerUp(),
-                robot.susan.ballKickers[order2[1]].ballKickerUp(),
-                robot.susan.ballKickers[order2[2]].ballKickerUp(),
+                //robot.susan.ballKickers[order2[0]].ballKickerUp(),
+                //robot.susan.ballKickers[order2[1]].ballKickerUp(),
+                //robot.susan.ballKickers[order2[2]].ballKickerUp(),
+                kickOrder2(0),
+                kickOrder2(1),
+                kickOrder2(2),
 
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.LeaveShooting, 1,true),
@@ -174,6 +184,50 @@ public class Blue extends LinearOpMode {
                 telemetry.update();
 
                 return timer.seconds() < 2;
+            }
+        };
+    }
+
+    public Action kickOrder1(int index) {
+        return new Action() {
+            private boolean initialized = false;
+            private Action underlyingAction = null;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    // LATE BINDING:
+                    // We access "order1" right now, ensuring we get the updated values
+                    // from findOrder(), not the initial values.
+                    int kickerId = order1[index];
+
+                    // Create the specific sub-action for this kicker
+                    underlyingAction = robot.susan.ballKickers[kickerId].ballKickerUp();
+                    initialized = true;
+                }
+
+                // Run the actual kicker action
+                return underlyingAction.run(packet);
+            }
+        };
+    }
+
+    public Action kickOrder2(int index) {
+        return new Action() {
+            private boolean initialized = false;
+            private Action underlyingAction = null;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    // Access "order2" dynamically
+                    int kickerId = order2[index];
+
+                    underlyingAction = robot.susan.ballKickers[kickerId].ballKickerUp();
+                    initialized = true;
+                }
+
+                return underlyingAction.run(packet);
             }
         };
     }
