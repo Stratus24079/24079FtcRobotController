@@ -24,8 +24,8 @@ public class Red extends LinearOpMode {
     private Follower follower;
     private RobotHardware robot;
 
-    int[] order1;
-    int[] order2;
+    int[] order1 = new int[]{2 ,1, 0};
+    int[] order2 = new int[]{0, 1, 2};
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -53,9 +53,9 @@ public class Red extends LinearOpMode {
                         robot.susan.innerIntakeOn()
                 ),
 
-                robot.susan.ballKickers[order1[0]].ballKickerUp(),
-                robot.susan.ballKickers[order1[1]].ballKickerUp(),
-                robot.susan.ballKickers[order1[2]].ballKickerUp(),
+                kickOrder1(0),
+                kickOrder1(1),
+                kickOrder1(2),
 
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Intake1, 0.4, true),
@@ -70,9 +70,9 @@ public class Red extends LinearOpMode {
                 ),
                 robot.intake.intakeOff(),
 
-                robot.susan.ballKickers[order1[0]].ballKickerUp(),
-                robot.susan.ballKickers[order1[1]].ballKickerUp(),
-                robot.susan.ballKickers[order1[2]].ballKickerUp(),
+                kickOrder1(0),
+                kickOrder1(1),
+                kickOrder1(2),
 
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Intake2, 0.5, true),
@@ -87,9 +87,9 @@ public class Red extends LinearOpMode {
                 ),
                 robot.intake.intakeOff(),
 
-                robot.susan.ballKickers[order2[0]].ballKickerUp(),
-                robot.susan.ballKickers[order2[1]].ballKickerUp(),
-                robot.susan.ballKickers[order2[2]].ballKickerUp(),
+                kickOrder2(0),
+                kickOrder2(1),
+                kickOrder2(2),
 
                 new ParallelAction(
                 pedroDriveOnPathChain(myPaths.LeaveShooting, 1,true),
@@ -98,6 +98,50 @@ public class Red extends LinearOpMode {
         )
 
         ));
+    }
+
+    public Action kickOrder1(int index) {
+        return new Action() {
+            private boolean initialized = false;
+            private Action underlyingAction = null;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    // LATE BINDING:
+                    // We access "order1" right now, ensuring we get the updated values
+                    // from findOrder(), not the initial values.
+                    int kickerId = order1[index];
+
+                    // Create the specific sub-action for this kicker
+                    underlyingAction = robot.susan.ballKickers[kickerId].ballKickerUp();
+                    initialized = true;
+                }
+
+                // Run the actual kicker action
+                return underlyingAction.run(packet);
+            }
+        };
+    }
+
+    public Action kickOrder2(int index) {
+        return new Action() {
+            private boolean initialized = false;
+            private Action underlyingAction = null;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    // Access "order2" dynamically
+                    int kickerId = order2[index];
+
+                    underlyingAction = robot.susan.ballKickers[kickerId].ballKickerUp();
+                    initialized = true;
+                }
+
+                return underlyingAction.run(packet);
+            }
+        };
     }
 
     public Action fireInOrder1() {
@@ -130,11 +174,16 @@ public class Red extends LinearOpMode {
 
     public Action findOrder() {
         return new Action() {
-
+            private boolean initialized = false;
             ElapsedTime timer = new ElapsedTime();
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    initialized = true;
+                    timer.reset();
+                }
+
                 if (robot.launcher.id == 21) {
                     order1 = new int[]{0, 1, 2};
                     order2 = new int[]{1, 2, 0};
@@ -146,7 +195,18 @@ public class Red extends LinearOpMode {
                     order2 = new int[]{0, 2, 1};
                 }
 
-                return timer.seconds() < 0.5;
+                telemetry.addData("id", robot.launcher.id);
+                telemetry.addData("order1", order1[0]);
+                telemetry.addData("order1", order1[1]);
+                telemetry.addData("order1", order1[2]);
+
+                telemetry.addData("order2", order2[0]);
+                telemetry.addData("order2", order2[1]);
+                telemetry.addData("order2", order2[2]);
+
+                telemetry.update();
+
+                return timer.seconds() < 1;
             }
         };
     }

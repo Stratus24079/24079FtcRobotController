@@ -183,7 +183,7 @@ public class Blue extends LinearOpMode {
 
                 telemetry.update();
 
-                return timer.seconds() < 2;
+                return timer.seconds() < 1;
             }
         };
     }

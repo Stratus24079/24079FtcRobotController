@@ -42,7 +42,7 @@ public class Launcher {
     public double CLOSE = 1;
     public double FARRPM = 5500;
     public double CLOSERPM = 3800;
-    public static double AUTO_RPM = 4000;
+    public double AUTO_RPM = 4000;
     public double revolutions_per_minute = 5000; //og: 5000
     public static final double TICKS_PER_REVOLUTION = 28;
     double TICKS_PER_SECOND = revolutions_per_minute / 60 * TICKS_PER_REVOLUTION;
@@ -216,6 +216,9 @@ public class Launcher {
                 double measuredRPM = spin1.getVelocity() * 60 / TICKS_PER_REVOLUTION;
                 myOpMode.telemetry.addData("measuredRPM2", measuredRPM);
                 myOpMode.telemetry.addData("ticks per second", spin1.getVelocity());
+
+                myOpMode.telemetry.update();
+
                 return spin1.getVelocity() < TICKS_PER_SECOND;
             }
         };

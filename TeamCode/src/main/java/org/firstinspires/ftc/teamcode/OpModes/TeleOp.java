@@ -29,6 +29,7 @@ public class TeleOp extends LinearOpMode {
         robot = new RobotHardware(this);
         robot.init();
 
+        robot.launcher.CLOSERPM = 3800;
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.startTeleopDrive(true);
