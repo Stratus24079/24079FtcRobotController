@@ -27,7 +27,7 @@ public class Blue extends LinearOpMode {
     private Follower follower;
     private RobotHardware robot;
 
-    int[] order1 = new int[]{2 ,1, 0};
+    int[] order1 = new int[]{2, 1, 0};
     int[] order2 = new int[]{0, 1, 2};
 
     @Override
@@ -55,9 +55,6 @@ public class Blue extends LinearOpMode {
                         robot.susan.innerIntakeOn()
                 ),
 
-                //robot.susan.ballKickers[order1[0]].ballKickerUp(),
-                //robot.susan.ballKickers[order1[1]].ballKickerUp(),
-                //robot.susan.ballKickers[order1[2]].ballKickerUp(),
                 kickOrder1(0),
                 kickOrder1(1),
                 kickOrder1(2),
@@ -78,9 +75,7 @@ public class Blue extends LinearOpMode {
                 kickOrder1(0),
                 kickOrder1(1),
                 kickOrder1(2),
-                //robot.susan.ballKickers[order1[0]].ballKickerUp(),
-                //robot.susan.ballKickers[order1[1]].ballKickerUp(),
-                //robot.susan.ballKickers[order1[2]].ballKickerUp(),
+
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Intake2, 0.5, true),
                         robot.intake.intakeOn(),
@@ -88,20 +83,18 @@ public class Blue extends LinearOpMode {
                         robot.launcher.launcherOff()
                 ),
                 new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.Shoot2, 1,true),
-                    robot.launcher.launcherOn(),
-                    robot.susan.innerIntakeOn()
+                        pedroDriveOnPathChain(myPaths.Shoot2, 1, true),
+                        robot.launcher.launcherOn(),
+                        robot.susan.innerIntakeOn()
                 ),
                 robot.intake.intakeOff(),
-                //robot.susan.ballKickers[order2[0]].ballKickerUp(),
-                //robot.susan.ballKickers[order2[1]].ballKickerUp(),
-                //robot.susan.ballKickers[order2[2]].ballKickerUp(),
+
                 kickOrder2(0),
                 kickOrder2(1),
                 kickOrder2(2),
 
                 new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.LeaveShooting, 1,true),
+                        pedroDriveOnPathChain(myPaths.LeaveShooting, 1, true),
                         robot.launcher.launcherOff(),
                         robot.susan.innerIntakeOff()
                 )
@@ -236,6 +229,7 @@ public class Blue extends LinearOpMode {
         return new Action() {
             private boolean initialized = false;
             ElapsedTime pathTimer = new ElapsedTime();
+
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
@@ -264,8 +258,9 @@ public class Blue extends LinearOpMode {
         };
     }
 
-    public static class Paths {
 
+
+    public static class Paths {
         public PathChain ReadMotif;
         public PathChain ShootPreload;
         public PathChain Intake1;
@@ -275,71 +270,75 @@ public class Blue extends LinearOpMode {
         public PathChain LeaveShooting;
 
         public Paths(Follower follower) {
-            ReadMotif = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(34.000, 135.000), new Pose(55.000, 126.000))
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(230))
+            ReadMotif = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(34.000, 135.000),
+
+                                    new Pose(55.000, 126.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(315))
+
                     .build();
 
-            ShootPreload = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(55.000, 126.000), new Pose(55.000, 89.000))
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(230), Math.toRadians(305))
+            ShootPreload = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(55.000, 126.000),
+
+                                    new Pose(55.000, 89.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(305))
+
                     .build();
 
-            Intake1 = follower
-                    .pathBuilder()
-                    .addPath(
+            Intake1 = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(55.000, 89.000),
                                     new Pose(58.138, 78.932),
                                     new Pose(13.000, 80.000)
                             )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(305), Math.toRadians(0))
+                    ).setLinearHeadingInterpolation(Math.toRadians(305), Math.toRadians(0))
+
                     .build();
 
-            Shoot1 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(13.000, 80.000), new Pose(55.000, 89.000))
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(315))
+            Shoot1 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(13.000, 80.000),
+
+                                    new Pose(55.000, 89.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(315))
+
                     .build();
 
-            Intake2 = follower
-                    .pathBuilder()
-                    .addPath(
+            Intake2 = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(55.000, 89.000),
                                     new Pose(67.306, 51.652),
                                     new Pose(9.000, 56.000)
                             )
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(0))
+                    ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(0))
+
                     .build();
 
-            Shoot2 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(9.000, 56.000), new Pose(55.000, 89.000))
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(315))
+            Shoot2 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(9.000, 56.000),
+
+                                    new Pose(55.000, 89.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(315))
+
                     .build();
 
-            LeaveShooting = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(55.000, 89.000), new Pose(55.000, 55.000))
-                    )
-                    .setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(90))
+            LeaveShooting = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(55.000, 89.000),
+
+                                    new Pose(55.000, 55.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(90))
+
                     .build();
         }
     }
-
-
 }

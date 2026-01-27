@@ -20,8 +20,7 @@ public class RobotHardware{
     String col = "red";
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
-    public RobotHardware(LinearOpMode opmode) {
-        myOpMode = opmode;
+    public RobotHardware(LinearOpMode opmode) {myOpMode = opmode;
     }
 
     public void init() {

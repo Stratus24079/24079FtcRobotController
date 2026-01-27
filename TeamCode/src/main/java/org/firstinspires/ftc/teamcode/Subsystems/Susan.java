@@ -78,9 +78,9 @@ public class Susan {
         }
 
         ballKickers = new BallKicker[] {
-                new BallKicker(myOpMode, "ballKicker1", 0.06, 0.16),
-                new BallKicker(myOpMode, "ballKicker2", 0.05, 0.15),
-                new BallKicker(myOpMode, "ballKicker3", 0.07, 0.17)
+                new BallKicker(myOpMode, "ballKicker1", 0.05, 0.17),
+                new BallKicker(myOpMode, "ballKicker2", 0.04, 0.15),
+                new BallKicker(myOpMode, "ballKicker3", 0.06, 0.17)
         };
         innerMotor = myOpMode.hardwareMap.get(DcMotor.class, "innerIntake");
 
@@ -134,26 +134,32 @@ public class Susan {
         Color.colorToHSV(colors2.toColor(), hsvValues2);
         Color.colorToHSV(colors3.toColor(), hsvValues3);
 
-        if (hsvValues1[0] >= 180 && ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) > 10) {
+        if (hsvValues1[0] >= 180 && ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) > 10 &&
+                ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) < 25) {
             RGBLight1.setPosition(0.7);
-        } else if (hsvValues1[0] > 120 && ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) > 10) {
+        } else if (hsvValues1[0] > 120 && ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) > 10 &&
+                ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) < 25) {
             RGBLight1.setPosition(0.5);
         } else {
             RGBLight1.setPosition(0);
         }
 
-        if (hsvValues2[0] >= 180 && ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) >  10) {
+        if (hsvValues2[0] >= 180 && ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) >  10 &&
+                ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) < 25) {
             RGBLight2.setPosition(0.7);
-        } else if (hsvValues2[0] > 120 && ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) >  10) {
+        } else if (hsvValues2[0] > 120 && ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) >  10 &&
+                ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) < 25) {
             RGBLight2.setPosition(0.5);
         } else {
             RGBLight2.setPosition(0);
         }
 
-        if (hsvValues3[0] >= 180 && ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) >  10) {
+        if (hsvValues3[0] >= 180 && ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) >  10 &&
+                ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) < 25) {
             RGBLight3.setPosition(0.7);
         }
-        else if (hsvValues3[0] > 120 && ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) >  10) {
+        else if (hsvValues3[0] > 120 && ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) >  10 &&
+                ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) < 25) {
             RGBLight3.setPosition(0.5);
         } else {
             RGBLight3.setPosition(0);
@@ -179,6 +185,12 @@ public class Susan {
                 ballKickers[2].kickerMode = BallKicker.KickerMode.KICKER_UP;
             } else {
                 ballKickers[2].kickerMode = BallKicker.KickerMode.KICKER_DOWN;
+            }
+
+            if (myOpMode.gamepad1.x) {
+                innerMotor.setPower(INNER_MOTOR_SPEED);
+            } else if (myOpMode.gamepad1.y) {
+                innerMotor.setPower(0);
             }
 
             if (myOpMode.gamepad2.dpad_up) {

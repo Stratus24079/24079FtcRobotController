@@ -23,12 +23,10 @@ public class BallKicker {
 
     // Define Drive constants.  Make them public so they CAN be used by the calling OpMode
     //TODO Update values based on desired position
-    public double UP_POSITION = 0.2;
+    public double UP_POSITION = 0;
     public double DOWN_POSITION = 0;
     public String SERVO_NAME = "";
     public KickerMode kickerMode = KickerMode.KICKER_DOWN;
-    public ElapsedTime timer = new ElapsedTime();
-    private boolean initialized = false;
 
     //Constructor
     public BallKicker(LinearOpMode opmode, String servoName, double upIn, double downIn) {
@@ -60,9 +58,6 @@ public class BallKicker {
         //TODO Update based on desired control scheme
     }
 
-    public void ballKickerAuto(){
-
-    }
     public Action ballKickerUp() {
         return new Action() {
             ElapsedTime timer = new ElapsedTime();
@@ -75,7 +70,7 @@ public class BallKicker {
                     kicker.setPosition(UP_POSITION);
                     initialized = true;
                 }
-                if (timer.seconds() < 0.7) {
+                if (timer.seconds() < 0.9) {
                     return true;
                 } else {
                     kicker.setPosition(DOWN_POSITION);

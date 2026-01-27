@@ -41,7 +41,7 @@ public class Launcher {
     public double FAR = 0.7;
     public double CLOSE = 1;
     public double FARRPM = 5500;
-    public double CLOSERPM = 3800;
+    public double CLOSERPM = 3600;
     public double AUTO_RPM = 4000;
     public double revolutions_per_minute = 5000; //og: 5000
     public static final double TICKS_PER_REVOLUTION = 28;
@@ -72,7 +72,7 @@ public class Launcher {
     public HoodMode hoodMode = HoodMode.CLOSE;
     public TurretMode turretMode = TurretMode.MANUAL;
 
-    public Launcher (OpMode opmode){
+    public Launcher (OpMode opmode) {
         myOpMode = opmode;
     }
 
@@ -180,10 +180,10 @@ public class Launcher {
         } else if(myOpMode.gamepad1.b) {
             hoodMode = HoodMode.CLOSE;
         }
-        if(abs(myOpMode.gamepad2.right_stick_x) > 0.5) {
+        if(myOpMode.gamepad1.left_bumper) {
             turretMode = TurretMode.MANUAL;
         }
-        if(myOpMode.gamepad2.right_trigger > 0.5){
+        if(myOpMode.gamepad1.right_bumper){
             turretMode = TurretMode.AUTO;
         }
 
@@ -203,6 +203,7 @@ public class Launcher {
     public Action launcherOn() {
         return new Action() {
             private boolean initialized = false;
+            ElapsedTime timer = new ElapsedTime();
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
@@ -211,6 +212,7 @@ public class Launcher {
                     spin1.setVelocity(TICKS_PER_SECOND);
                     spin2.setVelocity(TICKS_PER_SECOND);
                     initialized = true;
+                    timer.reset();
                 }
 
                 double measuredRPM = spin1.getVelocity() * 60 / TICKS_PER_REVOLUTION;
@@ -219,7 +221,7 @@ public class Launcher {
 
                 myOpMode.telemetry.update();
 
-                return spin1.getVelocity() < TICKS_PER_SECOND;
+                return spin1.getVelocity() < TICKS_PER_SECOND && timer.seconds() < 2.5;
             }
         };
     }
