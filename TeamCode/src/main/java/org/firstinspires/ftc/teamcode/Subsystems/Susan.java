@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -37,6 +38,10 @@ public class Susan {
     public BallKicker[] ballKickers = null;
     public DcMotor innerMotor = null;
 
+    public ElapsedTime timer = new ElapsedTime();
+    public int kickerIndex = 0;
+    public static final double KICK_TIME = 0.1;
+
     //TODO Adjust based on desired states
     public enum SusanMode {
         MANUAL,
@@ -46,7 +51,7 @@ public class Susan {
 
     // Define Drive constants.  Make them public so they CAN be used by the calling OpMode
     //TODO Update values based on desired position
-    public final double INNER_MOTOR_SPEED = 0.5;
+    public final double INNER_MOTOR_SPEED = 1;
     public Susan.SusanMode susanMode = SusanMode.MANUAL;
 
     //Constructor
@@ -78,9 +83,9 @@ public class Susan {
         }
 
         ballKickers = new BallKicker[] {
-                new BallKicker(myOpMode, "ballKicker1", 0.05, 0.17),
-                new BallKicker(myOpMode, "ballKicker2", 0.04, 0.15),
-                new BallKicker(myOpMode, "ballKicker3", 0.06, 0.17)
+                new BallKicker(myOpMode, "ballKicker1", 0.06, 0.17),
+                new BallKicker(myOpMode, "ballKicker2", 0.05, 0.15),
+                new BallKicker(myOpMode, "ballKicker3", 0.07, 0.17)
         };
         innerMotor = myOpMode.hardwareMap.get(DcMotor.class, "innerIntake");
 
@@ -95,6 +100,10 @@ public class Susan {
         myOpMode.telemetry.addData("susanMode", susanMode);
 
         for (BallKicker b : ballKickers) b.update();
+
+        if (susanMode == SusanMode.SEQUENTIAL) {
+            kickSequential();
+        }
 
         RGBLight();
         myOpMode.telemetry.addData("rgb1", hsvValues1[0]);
@@ -187,6 +196,12 @@ public class Susan {
                 ballKickers[2].kickerMode = BallKicker.KickerMode.KICKER_DOWN;
             }
 
+            if (myOpMode.gamepad2.a) {
+                susanMode = SusanMode.SEQUENTIAL;
+                kickerIndex = 0;
+                timer.reset();
+            }
+
             if (myOpMode.gamepad1.x) {
                 innerMotor.setPower(INNER_MOTOR_SPEED);
             } else if (myOpMode.gamepad1.y) {
@@ -201,6 +216,20 @@ public class Susan {
                 innerMotor.setPower(0);
             }
         }
+    }
+
+    public void kickSequential() {
+        double t = timer.seconds();
+
+        if (t < KICK_TIME) {
+            ballKickers[(kickerIndex + 2) % 3].kickerMode = BallKicker.KickerMode.KICKER_DOWN;
+            ballKickers[kickerIndex].kickerMode = BallKicker.KickerMode.KICKER_UP;
+        } else {
+            timer.reset();
+            kickerIndex++;
+        }
+
+        if (kickerIndex == 3) susanMode = SusanMode.MANUAL;
     }
 
     public Action innerIntakeOn() {
