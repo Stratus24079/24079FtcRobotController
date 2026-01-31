@@ -92,9 +92,9 @@ public class Susan {
         }
 
         ballKickers = new BallKicker[] {
-                new BallKicker(myOpMode, "ballKicker1", 0.06, 0.17),
-                new BallKicker(myOpMode, "ballKicker2", 0.05, 0.15),
-                new BallKicker(myOpMode, "ballKicker3", 0.07, 0.17)
+                new BallKicker(myOpMode, "ballKicker1", 0.22, 0.07),//0.17, 0.06
+                new BallKicker(myOpMode, "ballKicker2", 0.25, 0.1), //0.15, 0.05
+                new BallKicker(myOpMode, "ballKicker3", 0.22, 0.07), //0.17, 0.07
         };
         innerMotor = myOpMode.hardwareMap.get(DcMotor.class, "innerIntake");
 
