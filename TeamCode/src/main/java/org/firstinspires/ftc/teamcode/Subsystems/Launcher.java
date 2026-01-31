@@ -40,7 +40,7 @@ public class Launcher {
 
     public double FAR = 0.7;
     public double CLOSE = 1;
-    public double FARRPM = 5500;
+    public double FARRPM = 6000;
     public double CLOSERPM = 3600;
     public double AUTO_RPM = 4000;
     public double revolutions_per_minute = 5000; //og: 5000
@@ -142,11 +142,6 @@ public class Launcher {
 
                 myOpMode.telemetry.addData("Botpose", botpose.toString());
 
-                // Access barcode results
-                List<LLResultTypes.BarcodeResult> barcodeResults = result.getBarcodeResults();
-                for (LLResultTypes.BarcodeResult br : barcodeResults) {
-                    myOpMode.telemetry.addData("Barcode", "Data: %s", br.getData());
-                }
 
                 // Access fiducial results
                 List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
@@ -161,7 +156,7 @@ public class Launcher {
             double turretPower = turretPID.calculate(0, result.getTx());
             myOpMode.telemetry.addData("turretPower", turretPower);
 
-            if (turretError > 3) {
+            if (turretError > 1) {
                 turret.setPower(-turretPower);
             }
         }

@@ -4,9 +4,12 @@ import android.graphics.Color;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -20,6 +23,9 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Susan {
     /* Declare OpMode members. */
@@ -40,7 +46,10 @@ public class Susan {
 
     public ElapsedTime timer = new ElapsedTime();
     public int kickerIndex = 0;
-    public static final double KICK_TIME = 0.1;
+    public static final double KICK_TIME = 0.08;
+
+    private FtcDashboard dash = FtcDashboard.getInstance();
+    private List<Action> runningActions = new ArrayList<>();
 
     //TODO Adjust based on desired states
     public enum SusanMode {
@@ -101,10 +110,6 @@ public class Susan {
 
         for (BallKicker b : ballKickers) b.update();
 
-        if (susanMode == SusanMode.SEQUENTIAL) {
-            kickSequential();
-        }
-
         RGBLight();
         myOpMode.telemetry.addData("rgb1", hsvValues1[0]);
         myOpMode.telemetry.addData("distance1", ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM));
@@ -132,6 +137,31 @@ public class Susan {
         if (colorSensor1 instanceof DistanceSensor) {
             myOpMode.telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM));
         }
+    }
+
+    public void loop() {
+        TelemetryPacket packet = new TelemetryPacket();
+
+        // updated based on gamepads
+        if (myOpMode.gamepad2.a) {
+            runningActions.add(new SequentialAction(
+                    ballKickers[0].ballKickerUp(),
+                    ballKickers[1].ballKickerUp(),
+                    ballKickers[2].ballKickerUp()
+            ));
+        }
+
+        // update running actions
+        List<Action> newActions = new ArrayList<>();
+        for (Action action : runningActions) {
+            action.preview(packet.fieldOverlay());
+            if (action.run(packet)) {
+                newActions.add(action);
+            }
+        }
+        runningActions = newActions;
+
+        dash.sendTelemetryPacket(packet);
     }
 
     public void RGBLight(){
@@ -173,7 +203,6 @@ public class Susan {
         } else {
             RGBLight3.setPosition(0);
         }
-
     }
 
     public void teleOp() {
@@ -197,7 +226,7 @@ public class Susan {
             }
 
             if (myOpMode.gamepad2.a) {
-                susanMode = SusanMode.SEQUENTIAL;
+                //susanMode = SusanMode.SEQUENTIAL;
                 kickerIndex = 0;
                 timer.reset();
             }
@@ -215,21 +244,30 @@ public class Susan {
             } else if (myOpMode.gamepad2.dpad_left) {
                 innerMotor.setPower(0);
             }
+        } else {
+            kickSequential();
         }
     }
 
     public void kickSequential() {
         double t = timer.seconds();
 
-        if (t < KICK_TIME) {
-            ballKickers[(kickerIndex + 2) % 3].kickerMode = BallKicker.KickerMode.KICKER_DOWN;
-            ballKickers[kickerIndex].kickerMode = BallKicker.KickerMode.KICKER_UP;
+        if (kickerIndex == 3) {
+            if (ballKickers[2].isUp()) {
+                susanMode = SusanMode.MANUAL;
+            }
         } else {
-            timer.reset();
-            kickerIndex++;
-        }
+            if (ballKickers[kickerIndex].isUp()) {
+                ballKickers[(kickerIndex + 2) % 3].kickerMode = BallKicker.KickerMode.KICKER_DOWN;
+            }
 
-        if (kickerIndex == 3) susanMode = SusanMode.MANUAL;
+            if (t < KICK_TIME) {
+                ballKickers[kickerIndex].kickerMode = BallKicker.KickerMode.KICKER_UP;
+            } else {
+                timer.reset();
+                kickerIndex++;
+            }
+        }
     }
 
     public Action innerIntakeOn() {

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import static java.lang.Math.abs;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -52,6 +54,10 @@ public class BallKicker {
         }
     }
 
+    public boolean isUp() {
+        return abs(kicker.getPosition() - UP_POSITION) < 0.01;
+    }
+
     public void teleOp() {
         update();
         //Set states based on gamepad presses
@@ -70,7 +76,7 @@ public class BallKicker {
                     kicker.setPosition(UP_POSITION);
                     initialized = true;
                 }
-                if (timer.seconds() < 0.7) {
+                if (timer.seconds() < 0.2) {
                     return true;
                 } else {
                     kicker.setPosition(DOWN_POSITION);
