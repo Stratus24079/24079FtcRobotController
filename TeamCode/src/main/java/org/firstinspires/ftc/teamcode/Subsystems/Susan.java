@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -42,7 +43,7 @@ public class Susan {
     final float[] hsvValues3 = new float[3];
     float gain = 15;
     public BallKicker[] ballKickers = null;
-    public DcMotor innerMotor = null;
+    public DcMotorEx innerMotor = null;
 
     public ElapsedTime timer = new ElapsedTime();
     public int kickerIndex = 0;
@@ -60,7 +61,7 @@ public class Susan {
 
     // Define Drive constants.  Make them public so they CAN be used by the calling OpMode
     //TODO Update values based on desired position
-    public final double INNER_MOTOR_SPEED = 1;
+    public final double INNER_MOTOR_SPEED = 0.8;
     public Susan.SusanMode susanMode = SusanMode.MANUAL;
 
     //Constructor
@@ -96,7 +97,9 @@ public class Susan {
                 new BallKicker(myOpMode, "ballKicker2", 0.25, 0.1), //0.15, 0.05
                 new BallKicker(myOpMode, "ballKicker3", 0.22, 0.07), //0.17, 0.07
         };
-        innerMotor = myOpMode.hardwareMap.get(DcMotor.class, "innerIntake");
+        innerMotor = myOpMode.hardwareMap.get(DcMotorEx.class, "innerIntake");
+
+        innerMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         innerMotor.setDirection(DcMotor.Direction.REVERSE);
 
@@ -107,6 +110,8 @@ public class Susan {
 
     public void update() {
         myOpMode.telemetry.addData("susanMode", susanMode);
+        double innerMotorRPM = innerMotor.getVelocity() * 60 / 28;
+        myOpMode.telemetry.addData("innerMotorRPM", innerMotorRPM);
 
         for (BallKicker b : ballKickers) b.update();
 
@@ -137,31 +142,6 @@ public class Susan {
         if (colorSensor1 instanceof DistanceSensor) {
             myOpMode.telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM));
         }
-    }
-
-    public void loop() {
-        TelemetryPacket packet = new TelemetryPacket();
-
-        // updated based on gamepads
-        if (myOpMode.gamepad2.a) {
-            runningActions.add(new SequentialAction(
-                    ballKickers[0].ballKickerUp(),
-                    ballKickers[1].ballKickerUp(),
-                    ballKickers[2].ballKickerUp()
-            ));
-        }
-
-        // update running actions
-        List<Action> newActions = new ArrayList<>();
-        for (Action action : runningActions) {
-            action.preview(packet.fieldOverlay());
-            if (action.run(packet)) {
-                newActions.add(action);
-            }
-        }
-        runningActions = newActions;
-
-        dash.sendTelemetryPacket(packet);
     }
 
     public void RGBLight(){
@@ -244,11 +224,14 @@ public class Susan {
             } else if (myOpMode.gamepad2.dpad_left) {
                 innerMotor.setPower(0);
             }
-        } else {
-            kickSequential();
+
+            if(myOpMode.gamepad2.a){
+                kickSequential();
+            }
         }
     }
 
+    //use roadrunner actions in TeleOp
     public void kickSequential() {
         double t = timer.seconds();
 

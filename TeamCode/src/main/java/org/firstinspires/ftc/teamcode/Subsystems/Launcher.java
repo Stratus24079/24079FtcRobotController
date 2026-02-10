@@ -10,6 +10,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -36,6 +37,7 @@ public class Launcher {
     public DcMotorEx spin2 = null;
     public Servo hood = null;
     public CRServo turret = null;
+    public AnalogInput turretEncoder = null;
     public PIDController turretPID = null;
 
     public double FAR = 0.7;
@@ -93,6 +95,8 @@ public class Launcher {
         turret = myOpMode.hardwareMap.get(CRServo.class, "turret");
         turret.setPower(0);
 
+        turretEncoder = myOpMode.hardwareMap.get(AnalogInput.class, "turretEncoder");
+
         turretPID = new PIDController(turretKP, turretKI, turretKD, 0.8);
 
         limelight = myOpMode.hardwareMap.get(Limelight3A.class, "limelight");
@@ -127,7 +131,7 @@ public class Launcher {
         if(turretMode == TurretMode.MANUAL) {
             turret.setPower(myOpMode.gamepad2.right_stick_x);
         } else if (turretMode == TurretMode.AUTO) {
-            LLResult result = limelight.getLatestResult();
+            /*LLResult result = limelight.getLatestResult();
             if (result.isValid()) {
                 // Access general information
                 Pose3D botpose = result.getBotpose();
@@ -152,13 +156,18 @@ public class Launcher {
             } else {
                 myOpMode.telemetry.addData("Limelight", "No data available");
             }
+
             double turretError = abs(result.getTx());
             double turretPower = turretPID.calculate(0, result.getTx());
             myOpMode.telemetry.addData("turretPower", turretPower);
 
             if (turretError > 1) {
                 turret.setPower(-turretPower);
-            }
+            }*/
+
+            /*double turretPower = turretPID.calculate(0, turretEncoder.getVoltage() * 10);
+            myOpMode.telemetry.addData("turretPower", turretPower);
+            turret.setPower(turretPower);*/
         }
     }
 
@@ -186,13 +195,12 @@ public class Launcher {
         double measuredRPM2 = spin2.getVelocity() * 60 / TICKS_PER_REVOLUTION;
         myOpMode.telemetry.addData("turret mode", turretMode);
         myOpMode.telemetry.addData("turret pos", turret.getDirection().ordinal());
+        myOpMode.telemetry.addData("turret encoder", turretEncoder.getVoltage());
         myOpMode.telemetry.addData("spin1Velocity", spin1.getVelocity());
         myOpMode.telemetry.addData("hood mode", hoodMode);
         myOpMode.telemetry.addData("targetRPM", revolutions_per_minute);
         myOpMode.telemetry.addData("measuredRPM", measuredRPM);
         myOpMode.telemetry.addData("measuredRPM2", measuredRPM2);
-
-
     }
 
     public Action launcherOn() {

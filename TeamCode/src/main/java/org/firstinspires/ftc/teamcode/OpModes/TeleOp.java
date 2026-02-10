@@ -43,6 +43,11 @@ public class TeleOp extends LinearOpMode {
         while (opModeIsActive()) {
             follower.update();
             robot.teleOp();
+            telemetry.addData("Heading", follower.getPose().getHeading());
+
+            double turretPower = robot.launcher.turretPID.calculate(0, robot.launcher.turretEncoder.getVoltage() * 10);
+            telemetry.addData("turretPower", turretPower);
+            robot.launcher.turret.setPower(turretPower);
 
             if (gamepad1.dpad_up) {
                 driveMode = DriveMode.ROBOT_CENTRIC;
