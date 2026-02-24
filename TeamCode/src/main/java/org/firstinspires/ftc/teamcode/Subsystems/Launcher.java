@@ -43,16 +43,28 @@ public class Launcher {
     public double FAR = 0.7;
     public double CLOSE = 1;
     public double FARRPM = 6000;
-    public double CLOSERPM = 3600;
-    public double AUTO_RPM = 4000;
+    public double CLOSERPM = 2800;
+    public double AUTO_RPM = 3400;
     public double revolutions_per_minute = 5000; //og: 5000
     public static final double TICKS_PER_REVOLUTION = 28;
     double TICKS_PER_SECOND = revolutions_per_minute / 60 * TICKS_PER_REVOLUTION;
-    public double turretKP = 0.01;
+    public static double turretKP = 0.01;
     public double turretKI = 0;
     public double turretKD = 0;
     public int id = 21;
 
+    //turret
+    private double lastRawVoltage = 0;
+    private int turnCount = 0;
+    private double totalUnwrappedDegrees = 0;
+    private final double MAX_VOLTAGE = 3.3;
+    private final double WRAP_THRESHOLD = 2.0; // Voltage jump to detect a turn
+    private final double LIMIT_MIN_DEG = -470;
+    private final double LIMIT_MAX_DEG = 420;
+
+    //tuning
+    public static double hoodTuning = 1;
+    public static int TUNINGRPM = 2000;
 
     public enum LauncherMode {
         ON,
@@ -64,6 +76,7 @@ public class Launcher {
         CLOSE,
         FAR,
         AUTO,
+        TUNING,
     }
 
     public enum TurretMode{
@@ -126,12 +139,44 @@ public class Launcher {
         } else if(hoodMode == HoodMode.CLOSE) {
             hood.setPosition(CLOSE);
             revolutions_per_minute =  CLOSERPM;
+        }else if(hoodMode == HoodMode.TUNING){
+            hood.setPosition(hoodTuning);
+            revolutions_per_minute = TUNINGRPM;
         }
 
-        if(turretMode == TurretMode.MANUAL) {
+
+        //turret testing
+            double currentVoltage = turretEncoder.getVoltage();
+            double delta = currentVoltage - lastRawVoltage;
+
+            // Detect wrap-around using a threshold (approx 80% of max voltage)
+            // If it jumps from 0.2 to 3.1, that's a negative wrap
+            if (delta > (MAX_VOLTAGE * 0.8)) {
+                turnCount--;
+            }
+            // If it jumps from 3.1 to 0.2, that's a positive wrap
+            else if (delta < -(MAX_VOLTAGE * 0.8)) {
+                turnCount++;
+            }
+
+            double currentRotationDeg = (currentVoltage / MAX_VOLTAGE) * 360.0;
+            totalUnwrappedDegrees = (turnCount * 360.0) + currentRotationDeg;
+            myOpMode.telemetry.addData("turretDegrees", totalUnwrappedDegrees);
+
+            // 200 start
+            // 420 limit
+            // -470 limit
+
+            lastRawVoltage = currentVoltage;
+
+            //Limits: -807
+
+            //end of turret test
+
+        if(turretMode == TurretMode.MANUAL && !(totalUnwrappedDegrees > 420 && myOpMode.gamepad2.right_stick_x < 0 || totalUnwrappedDegrees < -470 && myOpMode.gamepad2.right_stick_x > 0)) {
             turret.setPower(myOpMode.gamepad2.right_stick_x);
         } else if (turretMode == TurretMode.AUTO) {
-            /*LLResult result = limelight.getLatestResult();
+            LLResult result = limelight.getLatestResult();
             if (result.isValid()) {
                 // Access general information
                 Pose3D botpose = result.getBotpose();
@@ -162,8 +207,13 @@ public class Launcher {
             myOpMode.telemetry.addData("turretPower", turretPower);
 
             if (turretError > 1) {
-                turret.setPower(-turretPower);
-            }*/
+                if (
+                        (totalUnwrappedDegrees > LIMIT_MIN_DEG && turretPower > 0) ||
+                                (totalUnwrappedDegrees < LIMIT_MAX_DEG && turretPower < 0)
+                ) {
+                    turret.setPower(-turretPower);
+                }
+            }
 
             /*double turretPower = turretPID.calculate(0, turretEncoder.getVoltage() * 10);
             myOpMode.telemetry.addData("turretPower", turretPower);
@@ -184,6 +234,20 @@ public class Launcher {
         } else if(myOpMode.gamepad1.b) {
             hoodMode = HoodMode.CLOSE;
         }
+      /*  } else if(myOpMode.gamepad1.right_trigger){ //idk why there's an error
+            hoodMode = HoodMode.TUNING;
+        }
+
+       */
+
+        if(myOpMode.gamepad1.dpad_up){
+            hoodTuning += 0.01;
+            TUNINGRPM += 25;
+        }else if(myOpMode.gamepad1.dpad_down){
+            hoodTuning -= 0.01;
+            TUNINGRPM -= 25;
+        }
+
         if(myOpMode.gamepad1.left_bumper) {
             turretMode = TurretMode.MANUAL;
         }
@@ -201,6 +265,7 @@ public class Launcher {
         myOpMode.telemetry.addData("targetRPM", revolutions_per_minute);
         myOpMode.telemetry.addData("measuredRPM", measuredRPM);
         myOpMode.telemetry.addData("measuredRPM2", measuredRPM2);
+        //telemetry for hood and RPM
     }
 
     public Action launcherOn() {
@@ -272,7 +337,7 @@ public class Launcher {
 
                 myOpMode.telemetry.addData("id", id);
                 myOpMode.telemetry.update();
-                return timer.seconds() < 2;
+                return timer.seconds() < 0.5;
             }
         };
     }

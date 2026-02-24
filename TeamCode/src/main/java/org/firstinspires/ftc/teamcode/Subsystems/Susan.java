@@ -206,7 +206,7 @@ public class Susan {
             }
 
             if (myOpMode.gamepad2.a) {
-                //susanMode = SusanMode.SEQUENTIAL;
+                susanMode = SusanMode.SEQUENTIAL;
                 kickerIndex = 0;
                 timer.reset();
             }

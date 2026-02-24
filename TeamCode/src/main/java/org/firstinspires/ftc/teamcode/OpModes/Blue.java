@@ -27,8 +27,10 @@ public class Blue extends LinearOpMode {
     private Follower follower;
     private RobotHardware robot;
 
+
     int[] order1 = new int[]{2, 1, 0};
     int[] order2 = new int[]{0, 1, 2};
+    int[] order3 = new int[]{0,1,2};
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -50,7 +52,7 @@ public class Blue extends LinearOpMode {
                 robot.launcher.scanMotif(),
                 findOrder(),
                 new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.ShootPreload, 1.2, true),
+                        pedroDriveOnPathChain(myPaths.ShootPreload, 1, true),
                         robot.launcher.launcherOn(),
                         robot.susan.innerIntakeOn()
                 ),
@@ -60,24 +62,30 @@ public class Blue extends LinearOpMode {
                 kickOrder1(2),
 
                 new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.Intake1, 0.5, true),
+                        pedroDriveOnPathChain(myPaths.Intake1, 0.7, true),
                         robot.intake.intakeOn(),
                         robot.susan.innerIntakeOff(),
                         robot.launcher.launcherOff()
+
                 ),
+                new SequentialAction(
+                        pedroDriveOnPathChain(myPaths.Gate, 1, true),
+                        robot.intake.intakeOff()
+                ),
+
+
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Shoot1, 1, true),
                         robot.launcher.launcherOn(),
                         robot.susan.innerIntakeOn()
                 ),
-                robot.intake.intakeOff(),
 
                 kickOrder1(0),
                 kickOrder1(1),
                 kickOrder1(2),
 
                 new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.Intake2, 0.5, true),
+                        pedroDriveOnPathChain(myPaths.Intake2, 0.7, true),
                         robot.intake.intakeOn(),
                         robot.susan.innerIntakeOff(),
                         robot.launcher.launcherOff()
@@ -94,7 +102,24 @@ public class Blue extends LinearOpMode {
                 kickOrder2(2),
 
                 new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.LeaveShooting, 1, true),
+                        pedroDriveOnPathChain(myPaths.Intake3, 0.7, true),
+                        robot.intake.intakeOn(),
+                        robot.susan.innerIntakeOff(),
+                        robot.launcher.launcherOff()
+                ),
+                new ParallelAction(
+                        pedroDriveOnPathChain(myPaths.Shoot3, 1, true),
+                        robot.launcher.launcherOn(),
+                        robot.susan.innerIntakeOn()
+                ),
+                robot.intake.intakeOff(),
+
+                kickOrder3(0),
+                kickOrder3(1),
+                kickOrder3(2),
+
+                new ParallelAction(
+                        pedroDriveOnPathChain(myPaths.leave, 1, true),
                         robot.launcher.launcherOff(),
                         robot.susan.innerIntakeOff()
                 )
@@ -157,12 +182,15 @@ public class Blue extends LinearOpMode {
                 if (robot.launcher.id == 21) {
                     order1 = new int[]{0, 1, 2};
                     order2 = new int[]{1, 2, 0};
+                    order3 = new int[]{2, 1, 0};
                 } else if (robot.launcher.id == 22) {
                     order1 = new int[]{1, 0, 2};
                     order2 = new int[]{0, 1, 2};
+                    order3 = new int[]{1, 2, 0};
                 } else if (robot.launcher.id == 23) {
                     order1 = new int[]{2, 1, 0};
                     order2 = new int[]{0, 2, 1};
+                    order3 = new int[]{0, 1, 2};
                 }
 
                 telemetry.addData("id", robot.launcher.id);
@@ -176,7 +204,7 @@ public class Blue extends LinearOpMode {
 
                 telemetry.update();
 
-                return timer.seconds() < 1;
+                return timer.seconds() < 0.5;
             }
         };
     }
@@ -225,6 +253,26 @@ public class Blue extends LinearOpMode {
         };
     }
 
+    public Action kickOrder3(int index) {
+        return new Action() {
+            private boolean initialized = false;
+            private Action underlyingAction = null;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    // Access "order3" dynamically
+                    int kickerId = order3[index];
+
+                    underlyingAction = robot.susan.ballKickers[kickerId].ballKickerUp();
+                    initialized = true;
+                }
+
+                return underlyingAction.run(packet);
+            }
+        };
+    }
+
     private Action pedroDriveOnPathChain(PathChain targetPathChain, double maxPower, boolean holdPos) {
         return new Action() {
             private boolean initialized = false;
@@ -260,14 +308,20 @@ public class Blue extends LinearOpMode {
 
 
 
+
+
+
     public static class Paths {
         public PathChain ReadMotif;
         public PathChain ShootPreload;
         public PathChain Intake1;
+        public PathChain Gate;
         public PathChain Shoot1;
         public PathChain Intake2;
         public PathChain Shoot2;
-        public PathChain LeaveShooting;
+        public PathChain Intake3;
+        public PathChain Shoot3;
+        public PathChain leave;
 
         public Paths(Follower follower) {
             ReadMotif = follower.pathBuilder().addPath(
@@ -276,7 +330,7 @@ public class Blue extends LinearOpMode {
 
                                     new Pose(55.000, 126.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(315))
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(240))
 
                     .build();
 
@@ -286,23 +340,33 @@ public class Blue extends LinearOpMode {
 
                                     new Pose(55.000, 89.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(305))
+                    ).setLinearHeadingInterpolation(Math.toRadians(240), Math.toRadians(305))
 
                     .build();
 
             Intake1 = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(55.000, 89.000),
-                                    new Pose(58.138, 78.932),
+                                    new Pose(95.479, 84.298),
                                     new Pose(13.000, 80.000)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(305), Math.toRadians(0))
 
                     .build();
 
+            Gate = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(13.000, 80.000),
+                                    new Pose(41.368, 74.236),
+                                    new Pose(10.553, 73.354)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+
+                    .build();
+
             Shoot1 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(13.000, 80.000),
+                                    new Pose(10.553, 73.354),
 
                                     new Pose(55.000, 89.000)
                             )
@@ -330,15 +394,36 @@ public class Blue extends LinearOpMode {
 
                     .build();
 
-            LeaveShooting = follower.pathBuilder().addPath(
+            Intake3 = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(55.000, 89.000),
+                                    new Pose(71.554, 25.714),
+                                    new Pose(10.727, 32.646)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(0))
+
+                    .build();
+
+            Shoot3 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(10.727, 32.646),
+
+                                    new Pose(55.000, 89.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(315))
+
+                    .build();
+
+            leave = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(55.000, 89.000),
 
-                                    new Pose(55.000, 55.000)
+                                    new Pose(55.000, 64.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(90))
+                    ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(180))
 
                     .build();
         }
     }
+
 }

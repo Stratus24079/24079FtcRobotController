@@ -48,9 +48,10 @@ public class TeleOp extends LinearOpMode {
             robot.teleOp();
             telemetry.addData("Heading", follower.getPose().getHeading());
 
-            if (robot.launcher.turretMode == Launcher.TurretMode.AUTO) {
+           /* if (robot.launcher.turretMode == Launcher.TurretMode.AUTO) {
                 autoAim();
             }
+           */
 
             if (gamepad1.dpad_up) {
                 driveMode = DriveMode.ROBOT_CENTRIC;
@@ -98,8 +99,8 @@ public class TeleOp extends LinearOpMode {
     }
 
     public void autoAim() {
-        double robotHeading = Math.toDegrees(follower.getHeading());
-        double turretAngle = turretToDeg(robot.launcher.turretEncoder.getVoltage());
+        double robotHeading = follower.getHeading();
+        double turretAngle = turretToAngle(robot.launcher.turretEncoder.getVoltage());
 
         double targ = 0;
         double turretTarget = wrap(targ - robotHeading);
@@ -120,13 +121,13 @@ public class TeleOp extends LinearOpMode {
         telemetry.addData("error", error);
     }
 
-    private double turretToDeg(double v) {
-        return wrap(v / 3.3 * 360);
+    private double turretToAngle(double v) {
+        return v / 3.3 * (Math.PI * 2);
     }
 
     private double wrap(double a) {
-        while (a > 180) a -= 360;
-        while (a < -180) a += 360;
+        while (a > Math.PI) a -= 2 * Math.PI;
+        while (a < -Math.PI) a += 2 * Math.PI;
         return a;
     }
 }

@@ -49,4 +49,14 @@ public class RobotHardware{
         launcher.update();
         susan.update();
     }
+
+    /*public void code(){
+        print("Hello world!");
+
+        Artifacts = true;
+        Auto = works;
+        Fail = no;
+        Worlds = true;
+    }
+    */
 }
