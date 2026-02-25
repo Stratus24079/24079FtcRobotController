@@ -173,11 +173,15 @@ public class Launcher {
             //Limits: -807
             //end of turret test
 
-        if(turretMode == TurretMode.MANUAL && !(totalUnwrappedDegrees > 420 && myOpMode.gamepad2.right_stick_x < 0 || totalUnwrappedDegrees < -470 && myOpMode.gamepad2.right_stick_x > 0)) {
-            turret.setPower(myOpMode.gamepad2.right_stick_x);
-        } else if (turretMode == TurretMode.AUTO) {
-            result = limelight.getLatestResult();
-            if (result.isValid()) {
+        //if(turretMode == TurretMode.MANUAL && !(totalUnwrappedDegrees > 420 && myOpMode.gamepad2.right_stick_x < 0 || totalUnwrappedDegrees < -470 && myOpMode.gamepad2.right_stick_x > 0)) {
+        if(turretMode == TurretMode.MANUAL) {
+                turret.setPower(myOpMode.gamepad2.right_stick_x);
+            } else if (turretMode == TurretMode.AUTO) {
+                if(Math.abs(myOpMode.gamepad2.right_stick_x) > 0.2){
+                    turretMode = TurretMode.MANUAL;
+                }
+                result = limelight.getLatestResult();
+                if (result.isValid()) {
 
                 /*
                 Pose3D botpose = result.getBotpose();
@@ -192,36 +196,32 @@ public class Launcher {
                 myOpMode.telemetry.addData("Botpose", botpose.toString());
                 */
 
-                myOpMode.telemetry.addData("tx", result.getTx());
+                    myOpMode.telemetry.addData("tx", result.getTx());
 
-                // Access fiducial results
-                fiducialResults = result.getFiducialResults();
-                for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                    myOpMode.telemetry.addData("Distance", fr.getCameraPoseTargetSpace().getPosition().z);
-                    //myOpMode.telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
+                    // Access fiducial results
+                    fiducialResults = result.getFiducialResults();
+                    for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                        myOpMode.telemetry.addData("Distance", fr.getCameraPoseTargetSpace().getPosition().z);
+                        //myOpMode.telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
+                    }
+
+                } else {
+                    myOpMode.telemetry.addData("Limelight", "No data available");
                 }
 
-            } else {
-                myOpMode.telemetry.addData("Limelight", "No data available");
-            }
+                double turretError = abs(result.getTx());
+                double turretPower = turretPID.calculate(0, result.getTx());
+                myOpMode.telemetry.addData("turretPower", turretPower);
 
-            double turretError = abs(result.getTx());
-            double turretPower = turretPID.calculate(0, result.getTx());
-            myOpMode.telemetry.addData("turretPower", turretPower);
-
-            if (turretError > 1) {
-                if (
-                        (totalUnwrappedDegrees > LIMIT_MIN_DEG && turretPower > 0) ||
-                                (totalUnwrappedDegrees < LIMIT_MAX_DEG && turretPower < 0)
-                ) {
-                    turret.setPower(-turretPower);
+                if (turretError > 0.5) {
+                        turret.setPower(-turretPower);
                 }
-            }
 
             /*double turretPower = turretPID.calculate(0, turretEncoder.getVoltage() * 10);
             myOpMode.telemetry.addData("turretPower", turretPower);
             turret.setPower(turretPower);*/
-        }
+            }
+        
     }
 
     public void teleOp(){
