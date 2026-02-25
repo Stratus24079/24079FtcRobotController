@@ -69,10 +69,9 @@ public class Blue extends LinearOpMode {
 
                 ),
                 new SequentialAction(
-                        pedroDriveOnPathChain(myPaths.Gate, 1, true),
+                        pedroDriveOnPathChain(myPaths.Gate, 0.7, true),
                         robot.intake.intakeOff()
                 ),
-
 
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Shoot1, 1, true),
@@ -307,10 +306,6 @@ public class Blue extends LinearOpMode {
     }
 
 
-
-
-
-
     public static class Paths {
         public PathChain ReadMotif;
         public PathChain ShootPreload;
@@ -338,7 +333,7 @@ public class Blue extends LinearOpMode {
                             new BezierLine(
                                     new Pose(55.000, 126.000),
 
-                                    new Pose(55.000, 89.000)
+                                    new Pose(60.000, 95.000)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(240), Math.toRadians(305))
 
@@ -346,8 +341,8 @@ public class Blue extends LinearOpMode {
 
             Intake1 = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(55.000, 89.000),
-                                    new Pose(95.479, 84.298),
+                                    new Pose(60.000, 95.000),
+                                    new Pose(73.119, 82.509),
                                     new Pose(13.000, 80.000)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(305), Math.toRadians(0))
@@ -357,8 +352,8 @@ public class Blue extends LinearOpMode {
             Gate = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(13.000, 80.000),
-                                    new Pose(41.368, 74.236),
-                                    new Pose(10.553, 73.354)
+                                    new Pose(36.672, 77.814),
+                                    new Pose(13.000, 75.000)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
@@ -366,7 +361,7 @@ public class Blue extends LinearOpMode {
 
             Shoot1 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(10.553, 73.354),
+                                    new Pose(13.000, 75.000),
 
                                     new Pose(55.000, 89.000)
                             )

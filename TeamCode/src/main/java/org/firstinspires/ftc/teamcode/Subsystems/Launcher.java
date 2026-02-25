@@ -43,8 +43,8 @@ public class Launcher {
     public double FAR = 0.7;
     public double CLOSE = 1;
     public double FARRPM = 6000;
-    public double CLOSERPM = 2800;
-    public double AUTO_RPM = 3400;
+    public double CLOSERPM = 3200;
+    public double AUTO_RPM = 3300;
     public double revolutions_per_minute = 5000; //og: 5000
     public static final double TICKS_PER_REVOLUTION = 28;
     double TICKS_PER_SECOND = revolutions_per_minute / 60 * TICKS_PER_REVOLUTION;
@@ -52,6 +52,8 @@ public class Launcher {
     public double turretKI = 0;
     public double turretKD = 0;
     public int id = 21;
+    LLResult result;
+    List<LLResultTypes.FiducialResult> fiducialResults;
 
     //turret
     private double lastRawVoltage = 0;
@@ -116,10 +118,9 @@ public class Launcher {
 
         limelight.pipelineSwitch(0);
 
-        /*
-         * Starts polling for data.  If you neglect to call start(), getLatestResult() will return null.
-         */
         limelight.start();
+        result = limelight.getLatestResult();
+        fiducialResults = result.getFiducialResults();
     }
 
     public void update(){
@@ -170,32 +171,34 @@ public class Launcher {
             lastRawVoltage = currentVoltage;
 
             //Limits: -807
-
             //end of turret test
 
         if(turretMode == TurretMode.MANUAL && !(totalUnwrappedDegrees > 420 && myOpMode.gamepad2.right_stick_x < 0 || totalUnwrappedDegrees < -470 && myOpMode.gamepad2.right_stick_x > 0)) {
             turret.setPower(myOpMode.gamepad2.right_stick_x);
         } else if (turretMode == TurretMode.AUTO) {
-            LLResult result = limelight.getLatestResult();
+            result = limelight.getLatestResult();
             if (result.isValid()) {
-                // Access general information
+
+                /*
                 Pose3D botpose = result.getBotpose();
                 double captureLatency = result.getCaptureLatency();
                 double targetingLatency = result.getTargetingLatency();
                 double parseLatency = result.getParseLatency();
 
-                myOpMode.telemetry.addData("tx", result.getTx());
                 myOpMode.telemetry.addData("txnc", result.getTxNC());
                 myOpMode.telemetry.addData("ty", result.getTy());
                 myOpMode.telemetry.addData("tync", result.getTyNC());
 
                 myOpMode.telemetry.addData("Botpose", botpose.toString());
+                */
 
+                myOpMode.telemetry.addData("tx", result.getTx());
 
                 // Access fiducial results
-                List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
+                fiducialResults = result.getFiducialResults();
                 for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                    myOpMode.telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
+                    myOpMode.telemetry.addData("Distance", fr.getCameraPoseTargetSpace().getPosition().z);
+                    //myOpMode.telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
                 }
 
             } else {
@@ -229,23 +232,24 @@ public class Launcher {
         } else if (myOpMode.gamepad1.y) {
             launcherMode = LauncherMode.OFF;
         }
+
         if (myOpMode.gamepad1.a) {
             hoodMode = HoodMode.FAR;
         } else if(myOpMode.gamepad1.b) {
             hoodMode = HoodMode.CLOSE;
-        }
-      /*  } else if(myOpMode.gamepad1.right_trigger){ //idk why there's an error
+        } else if(myOpMode.gamepad1.right_trigger > 0.5){
             hoodMode = HoodMode.TUNING;
         }
 
-       */
-
         if(myOpMode.gamepad1.dpad_up){
-            hoodTuning += 0.01;
             TUNINGRPM += 25;
         }else if(myOpMode.gamepad1.dpad_down){
-            hoodTuning -= 0.01;
             TUNINGRPM -= 25;
+        }
+        if(myOpMode.gamepad1.dpad_left){
+            hoodTuning += 0.01;
+        }else if(myOpMode.gamepad1.dpad_right){
+            hoodTuning -= 0.01;
         }
 
         if(myOpMode.gamepad1.left_bumper) {
@@ -258,14 +262,14 @@ public class Launcher {
         double measuredRPM = spin1.getVelocity() * 60 / TICKS_PER_REVOLUTION;
         double measuredRPM2 = spin2.getVelocity() * 60 / TICKS_PER_REVOLUTION;
         myOpMode.telemetry.addData("turret mode", turretMode);
-        myOpMode.telemetry.addData("turret pos", turret.getDirection().ordinal());
-        myOpMode.telemetry.addData("turret encoder", turretEncoder.getVoltage());
-        myOpMode.telemetry.addData("spin1Velocity", spin1.getVelocity());
+        //myOpMode.telemetry.addData("turret pos", turret.getDirection().ordinal());
+        //myOpMode.telemetry.addData("turret encoder", turretEncoder.getVoltage());
+        //myOpMode.telemetry.addData("spin1Velocity", spin1.getVelocity());
         myOpMode.telemetry.addData("hood mode", hoodMode);
         myOpMode.telemetry.addData("targetRPM", revolutions_per_minute);
         myOpMode.telemetry.addData("measuredRPM", measuredRPM);
-        myOpMode.telemetry.addData("measuredRPM2", measuredRPM2);
-        //telemetry for hood and RPM
+        //myOpMode.telemetry.addData("measuredRPM2", measuredRPM2);
+        myOpMode.telemetry.addData("hoodPosition", hood.getPosition());
     }
 
     public Action launcherOn() {

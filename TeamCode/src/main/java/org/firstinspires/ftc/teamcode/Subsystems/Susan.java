@@ -41,7 +41,12 @@ public class Susan {
     final float[] hsvValues1 = new float[3];
     final float[] hsvValues2 = new float[3];
     final float[] hsvValues3 = new float[3];
+    NormalizedRGBA colors1;
+    NormalizedRGBA colors2;
+    NormalizedRGBA colors3;
     float gain = 15;
+    int loopCounter;
+
     public BallKicker[] ballKickers = null;
     public DcMotorEx innerMotor = null;
 
@@ -105,6 +110,8 @@ public class Susan {
 
         for (BallKicker b : ballKickers) b.init();
 
+        loopCounter = 0;
+
         myOpMode.telemetry.addData(">", "Susan Initialized");
     }
 
@@ -116,6 +123,7 @@ public class Susan {
         for (BallKicker b : ballKickers) b.update();
 
         RGBLight();
+        /*
         myOpMode.telemetry.addData("rgb1", hsvValues1[0]);
         myOpMode.telemetry.addData("distance1", ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM));
         myOpMode.telemetry.addData("rgb2", hsvValues2[0]);
@@ -139,50 +147,59 @@ public class Susan {
         /* If this color sensor also has a distance sensor, display the measured distance.
          * Note that the reported distance is only useful at very close range, and is impacted by
          * ambient light and surface reflectivity. */
+        /*
         if (colorSensor1 instanceof DistanceSensor) {
             myOpMode.telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM));
+        }
+
+         */
+        loopCounter++;
+        if(loopCounter > 20000){
+            loopCounter = 0;
         }
     }
 
     public void RGBLight(){
-        NormalizedRGBA colors1 = colorSensor1.getNormalizedColors();
-        NormalizedRGBA colors2 = colorSensor2.getNormalizedColors();
-        NormalizedRGBA colors3 = colorSensor3.getNormalizedColors();
 
-        Color.colorToHSV(colors1.toColor(), hsvValues1);
-        Color.colorToHSV(colors2.toColor(), hsvValues2);
-        Color.colorToHSV(colors3.toColor(), hsvValues3);
+     if(loopCounter % 5 ==0) {
+         colors1 = colorSensor1.getNormalizedColors();
+         Color.colorToHSV(colors1.toColor(), hsvValues1);
+         if (hsvValues1[0] >= 180 && ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) > 10 &&
+                 ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) < 25) {
+             RGBLight1.setPosition(0.7);
+         } else if (hsvValues1[0] > 120 && ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) > 10 &&
+                 ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) < 25) {
+             RGBLight1.setPosition(0.5);
+         } else {
+             RGBLight1.setPosition(0);
+         }
+     }else if(loopCounter % 5 == 1) {
 
-        if (hsvValues1[0] >= 180 && ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) > 10 &&
-                ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) < 25) {
-            RGBLight1.setPosition(0.7);
-        } else if (hsvValues1[0] > 120 && ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) > 10 &&
-                ((DistanceSensor) colorSensor1).getDistance(DistanceUnit.CM) < 25) {
-            RGBLight1.setPosition(0.5);
-        } else {
-            RGBLight1.setPosition(0);
-        }
+         colors2 = colorSensor2.getNormalizedColors();
+         Color.colorToHSV(colors2.toColor(), hsvValues2);
+         if (hsvValues2[0] >= 180 && ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) > 10 &&
+                 ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) < 25) {
+             RGBLight2.setPosition(0.7);
+         } else if (hsvValues2[0] > 120 && ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) > 10 &&
+                 ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) < 25) {
+             RGBLight2.setPosition(0.5);
+         } else {
+             RGBLight2.setPosition(0);
+         }
+     }else if(loopCounter % 5 == 2) {
 
-        if (hsvValues2[0] >= 180 && ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) >  10 &&
-                ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) < 25) {
-            RGBLight2.setPosition(0.7);
-        } else if (hsvValues2[0] > 120 && ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) >  10 &&
-                ((DistanceSensor) colorSensor2).getDistance(DistanceUnit.CM) < 25) {
-            RGBLight2.setPosition(0.5);
-        } else {
-            RGBLight2.setPosition(0);
-        }
-
-        if (hsvValues3[0] >= 180 && ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) >  10 &&
-                ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) < 25) {
-            RGBLight3.setPosition(0.7);
-        }
-        else if (hsvValues3[0] > 120 && ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) >  10 &&
-                ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) < 25) {
-            RGBLight3.setPosition(0.5);
-        } else {
-            RGBLight3.setPosition(0);
-        }
+         colors3 = colorSensor3.getNormalizedColors();
+         Color.colorToHSV(colors3.toColor(), hsvValues3);
+         if (hsvValues3[0] >= 180 && ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) > 10 &&
+                 ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) < 25) {
+             RGBLight3.setPosition(0.7);
+         } else if (hsvValues3[0] > 120 && ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) > 10 &&
+                 ((DistanceSensor) colorSensor3).getDistance(DistanceUnit.CM) < 25) {
+             RGBLight3.setPosition(0.5);
+         } else {
+             RGBLight3.setPosition(0);
+         }
+     }
     }
 
     public void teleOp() {

@@ -46,7 +46,7 @@ public class BallKicker {
     }
 
     public void update() {
-        myOpMode.telemetry.addData("kickerMode", kickerMode);
+        //myOpMode.telemetry.addData("kickerMode", kickerMode);
         if (kickerMode == KickerMode.KICKER_UP) {
             kicker.setPosition(UP_POSITION);
         } else {

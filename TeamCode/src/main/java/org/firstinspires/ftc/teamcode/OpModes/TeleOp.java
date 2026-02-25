@@ -5,11 +5,15 @@ import static java.lang.Math.abs;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotHardware;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+
+import java.util.List;
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name="TeleOp", group="Linear OpMode")
 public class TeleOp extends LinearOpMode {
@@ -19,6 +23,7 @@ public class TeleOp extends LinearOpMode {
     private Follower follower;
     public static Pose startingPose;
     public double speedMultiplier = 0.75;
+    public ElapsedTime loopTime;
 
     enum DriveMode{
         ROBOT_CENTRIC,
@@ -32,7 +37,13 @@ public class TeleOp extends LinearOpMode {
         robot = new RobotHardware(this);
         robot.init();
 
-        robot.launcher.CLOSERPM = 3800;
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+        for(LynxModule hub : allHubs){
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
+
+        loopTime = new ElapsedTime();
+
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.startTeleopDrive(true);
@@ -44,9 +55,12 @@ public class TeleOp extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            telemetry.addData("loopTime", loopTime.milliseconds());
+            loopTime.reset();
+
             follower.update();
             robot.teleOp();
-            telemetry.addData("Heading", follower.getPose().getHeading());
+            //telemetry.addData("Heading", follower.getPose().getHeading());
 
            /* if (robot.launcher.turretMode == Launcher.TurretMode.AUTO) {
                 autoAim();
@@ -55,11 +69,11 @@ public class TeleOp extends LinearOpMode {
 
             if (gamepad1.dpad_up) {
                 driveMode = DriveMode.ROBOT_CENTRIC;
-            } else if (gamepad1.dpad_left) {
+            } else if (gamepad1.dpad_left && robot.launcher.hoodMode != Launcher.HoodMode.TUNING) {
                // driveMode = DriveMode.BLUE_FIELD_CENTRIC;
-                robot.launcher.limelight.pipelineSwitch(1);
-            } else if (gamepad1.dpad_right) {
-                robot.launcher.limelight.pipelineSwitch(3);
+                robot.launcher.limelight.pipelineSwitch(2);
+            } else if (gamepad1.dpad_right && robot.launcher.hoodMode != Launcher.HoodMode.TUNING) {
+                robot.launcher.limelight.pipelineSwitch(4);
                // driveMode = DriveMode.RED_FIELD_CENTRIC;
             }
 

@@ -29,6 +29,8 @@ public class Drivetrain {
     GoBildaPinpointDriver pinpoint;
     public IMU imu;
 
+    Pose2D pose2D;
+
     static final double COUNTS_PER_INCH = 50;
     ElapsedTime timeout = new ElapsedTime();
 
@@ -83,7 +85,7 @@ public class Drivetrain {
 
     public void teleOp() {
         pinpoint.update();
-        Pose2D pose2D = pinpoint.getPosition();
+        pose2D = pinpoint.getPosition();
 
         myOpMode.telemetry.addData("X coordinate (IN)", pose2D.getX(DistanceUnit.INCH));
         myOpMode.telemetry.addData("Y coordinate (IN)", pose2D.getY(DistanceUnit.INCH));
