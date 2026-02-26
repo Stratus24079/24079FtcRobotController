@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.RobotHardware;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous
-public class Red extends LinearOpMode {
+public class RedClose extends LinearOpMode {
     private Follower follower;
     private RobotHardware robot;
 
@@ -49,7 +49,7 @@ public class Red extends LinearOpMode {
                 findOrder(),
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.ShootPreload, 1.2, true),
-                        robot.launcher.launcherOn(),
+                        robot.launcher.launcherOn("CLOSE"),
                         robot.susan.innerIntakeOn()
                 ),
 
@@ -65,7 +65,7 @@ public class Red extends LinearOpMode {
                 ),
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Shoot1, 1, true),
-                        robot.launcher.launcherOn(),
+                        robot.launcher.launcherOn("CLOSE"),
                         robot.susan.innerIntakeOn()
                 ),
                 robot.intake.intakeOff(),
@@ -82,7 +82,7 @@ public class Red extends LinearOpMode {
                 ),
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Shoot2, 1,true),
-                    robot.launcher.launcherOn(),
+                    robot.launcher.launcherOn("CLOSE"),
                     robot.susan.innerIntakeOn()
                 ),
                 robot.intake.intakeOff(),

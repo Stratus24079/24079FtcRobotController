@@ -44,8 +44,10 @@ public class Launcher {
     public double CLOSE = 1;
     public double FARRPM = 6000;
     public double CLOSERPM = 3200;
-    public double AUTO_RPM = 3300;
-    public double revolutions_per_minute = 5000; //og: 5000
+    public double AUTO_CLOSE_RPM = 3300;
+    public double AUTO_FAR_RPM = 6000;
+
+    public double revolutions_per_minute = 5000;
     public static final double TICKS_PER_REVOLUTION = 28;
     double TICKS_PER_SECOND = revolutions_per_minute / 60 * TICKS_PER_REVOLUTION;
     public static double turretKP = 0.01;
@@ -54,8 +56,9 @@ public class Launcher {
     public int id = 21;
     LLResult result;
     List<LLResultTypes.FiducialResult> fiducialResults;
+    double distance;
 
-    //turret
+    //turret testing
     private double lastRawVoltage = 0;
     private int turnCount = 0;
     private double totalUnwrappedDegrees = 0;
@@ -140,11 +143,18 @@ public class Launcher {
         } else if(hoodMode == HoodMode.CLOSE) {
             hood.setPosition(CLOSE);
             revolutions_per_minute =  CLOSERPM;
-        }else if(hoodMode == HoodMode.TUNING){
+        } else if(hoodMode == HoodMode.TUNING){
             hood.setPosition(hoodTuning);
             revolutions_per_minute = TUNINGRPM;
+        } else if(hoodMode == HoodMode.AUTO){
+            revolutions_per_minute = 666 * distance + 2373;
+            if(distance > 2.4){
+                hood.setPosition(0.7);
+            }
+            else{
+                hood.setPosition(1);
+            }
         }
-
 
         //turret testing
             double currentVoltage = turretEncoder.getVoltage();
@@ -201,7 +211,8 @@ public class Launcher {
                     // Access fiducial results
                     fiducialResults = result.getFiducialResults();
                     for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                        myOpMode.telemetry.addData("Distance", fr.getCameraPoseTargetSpace().getPosition().z);
+                        distance = -fr.getCameraPoseTargetSpace().getPosition().z;
+                        myOpMode.telemetry.addData("Distance", distance);
                         //myOpMode.telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
                     }
 
@@ -221,7 +232,6 @@ public class Launcher {
             myOpMode.telemetry.addData("turretPower", turretPower);
             turret.setPower(turretPower);*/
             }
-        
     }
 
     public void teleOp(){
@@ -247,9 +257,9 @@ public class Launcher {
             TUNINGRPM -= 25;
         }
         if(myOpMode.gamepad1.dpad_left){
-            hoodTuning += 0.01;
+            hoodTuning += 0.02;
         }else if(myOpMode.gamepad1.dpad_right){
-            hoodTuning -= 0.01;
+            hoodTuning -= 0.02;
         }
 
         if(myOpMode.gamepad1.left_bumper) {
@@ -257,6 +267,7 @@ public class Launcher {
         }
         if(myOpMode.gamepad1.right_bumper){
             turretMode = TurretMode.AUTO;
+            hoodMode = HoodMode.AUTO;
         }
 
         double measuredRPM = spin1.getVelocity() * 60 / TICKS_PER_REVOLUTION;
@@ -272,7 +283,7 @@ public class Launcher {
         myOpMode.telemetry.addData("hoodPosition", hood.getPosition());
     }
 
-    public Action launcherOn() {
+    public Action launcherOn(String loc) {
         return new Action() {
             private boolean initialized = false;
             ElapsedTime timer = new ElapsedTime();
@@ -280,7 +291,7 @@ public class Launcher {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    TICKS_PER_SECOND = (AUTO_RPM / 60) * TICKS_PER_REVOLUTION;
+                    TICKS_PER_SECOND = ((loc.equals("CLOSE") ? AUTO_CLOSE_RPM : AUTO_FAR_RPM) / 60) * TICKS_PER_REVOLUTION;
                     spin1.setVelocity(TICKS_PER_SECOND);
                     spin2.setVelocity(TICKS_PER_SECOND);
                     initialized = true;

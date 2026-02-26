@@ -222,11 +222,11 @@ public class Susan {
                 ballKickers[2].kickerMode = BallKicker.KickerMode.KICKER_DOWN;
             }
 
-            if (myOpMode.gamepad2.a) {
+            /*if (myOpMode.gamepad2.a) {
                 susanMode = SusanMode.SEQUENTIAL;
                 kickerIndex = 0;
                 timer.reset();
-            }
+            }*/
 
             if (myOpMode.gamepad1.x) {
                 innerMotor.setPower(INNER_MOTOR_SPEED);

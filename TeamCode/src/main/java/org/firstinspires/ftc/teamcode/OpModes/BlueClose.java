@@ -16,14 +16,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Subsystems.BallKicker;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotHardware;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-import java.util.ArrayList;
-
 @Autonomous
-public class Blue extends LinearOpMode {
+public class BlueClose extends LinearOpMode {
     private Follower follower;
     private RobotHardware robot;
 
@@ -53,7 +50,7 @@ public class Blue extends LinearOpMode {
                 findOrder(),
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.ShootPreload, 1, true),
-                        robot.launcher.launcherOn(),
+                        robot.launcher.launcherOn("CLOSE"),
                         robot.susan.innerIntakeOn()
                 ),
 
@@ -75,7 +72,7 @@ public class Blue extends LinearOpMode {
 
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Shoot1, 1, true),
-                        robot.launcher.launcherOn(),
+                        robot.launcher.launcherOn("CLOSE"),
                         robot.susan.innerIntakeOn()
                 ),
 
@@ -91,7 +88,7 @@ public class Blue extends LinearOpMode {
                 ),
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Shoot2, 1, true),
-                        robot.launcher.launcherOn(),
+                        robot.launcher.launcherOn("CLOSE"),
                         robot.susan.innerIntakeOn()
                 ),
                 robot.intake.intakeOff(),
@@ -108,7 +105,7 @@ public class Blue extends LinearOpMode {
                 ),
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Shoot3, 1, true),
-                        robot.launcher.launcherOn(),
+                        robot.launcher.launcherOn("CLOSE"),
                         robot.susan.innerIntakeOn()
                 ),
                 robot.intake.intakeOff(),
