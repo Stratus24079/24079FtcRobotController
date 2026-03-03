@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.RobotHardware;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous
-public class BlueClose extends LinearOpMode {
+public class RedClose12 extends LinearOpMode {
     private Follower follower;
     private RobotHardware robot;
 
@@ -31,7 +31,7 @@ public class BlueClose extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Pose startPose = new Pose(34, 135, Math.toRadians(0));
+        Pose startPose = new Pose(111, 135, Math.toRadians(180));
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
 
@@ -48,11 +48,16 @@ public class BlueClose extends LinearOpMode {
                 pedroDriveOnPathChain(myPaths.ReadMotif, 1, true),
                 robot.launcher.scanMotif(),
                 findOrder(),
+                robot.launcher.switchRed(),
+
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.ShootPreload, 1, true),
+
                         robot.launcher.launcherOn("CLOSE"),
                         robot.susan.innerIntakeOn()
                 ),
+
+                robot.launcher.autoAim(),
 
                 kickOrder1(0),
                 kickOrder1(1),
@@ -76,6 +81,8 @@ public class BlueClose extends LinearOpMode {
                         robot.susan.innerIntakeOn()
                 ),
 
+                robot.launcher.autoAim(),
+
                 kickOrder1(0),
                 kickOrder1(1),
                 kickOrder1(2),
@@ -92,6 +99,8 @@ public class BlueClose extends LinearOpMode {
                         robot.susan.innerIntakeOn()
                 ),
                 robot.intake.intakeOff(),
+
+                robot.launcher.autoAim(),
 
                 kickOrder2(0),
                 kickOrder2(1),
@@ -110,6 +119,8 @@ public class BlueClose extends LinearOpMode {
                 ),
                 robot.intake.intakeOff(),
 
+                robot.launcher.autoAim(),
+
                 kickOrder3(0),
                 kickOrder3(1),
                 kickOrder3(2),
@@ -121,6 +132,46 @@ public class BlueClose extends LinearOpMode {
                 )
 
         ));
+    }
+
+    public Action fireInOrder1() {
+        return new Action() {
+            private boolean initialized = false;
+            ElapsedTime timer = new ElapsedTime();
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+
+                if (!initialized) {
+                    timer.reset();
+                    initialized = true;
+                }
+
+                for (int i = 0; i < 3; i++) {
+                    if (order1[i] == 1) robot.susan.ballKickers[0].ballKickerUp().run(packet);
+                    else if (order1[i] == 2) robot.susan.ballKickers[1].ballKickerUp().run(packet);
+                    else if (order1[i] == 3) robot.susan.ballKickers[2].ballKickerUp().run(packet);
+                }
+                return timer.seconds() < 2.5;
+            }
+        };
+    }
+
+    public Action fireInOrder2() {
+        return new Action() {
+
+            ElapsedTime timer = new ElapsedTime();
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                for (int i = 0; i < 3; i++) {
+                    if (order2[i] == 1) robot.susan.ballKickers[0].ballKickerUp().run(packet);
+                    else if (order2[i] == 2) robot.susan.ballKickers[1].ballKickerUp().run(packet);
+                    else if (order2[i] == 3) robot.susan.ballKickers[2].ballKickerUp().run(packet);
+                }
+                return timer.seconds() < 0.5;
+            }
+        };
     }
 
     public Action findOrder() {
@@ -263,6 +314,7 @@ public class BlueClose extends LinearOpMode {
     }
 
 
+
     public static class Paths {
         public PathChain ReadMotif;
         public PathChain ShootPreload;
@@ -278,103 +330,104 @@ public class BlueClose extends LinearOpMode {
         public Paths(Follower follower) {
             ReadMotif = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(34.000, 135.000),
+                                    new Pose(111.000, 135.000),
 
-                                    new Pose(55.000, 126.000)
+                                    new Pose(89.000, 125.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(240))
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(270))
 
                     .build();
 
             ShootPreload = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(55.000, 126.000),
+                                    new Pose(89.000, 125.000),
 
-                                    new Pose(60.000, 94.000)
+                                    new Pose(84.000, 94.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(240), Math.toRadians(305))
+                    ).setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(228))
 
                     .build();
 
             Intake1 = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(60.000, 94.000),
-                                    new Pose(73.119, 82.509),
-                                    new Pose(13.000, 80.000)
+                                    new Pose(84.000, 94.000),
+                                    new Pose(80.274, 84.075),
+                                    new Pose(135.000, 85.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(305), Math.toRadians(0))
+                    ).setLinearHeadingInterpolation(Math.toRadians(228), Math.toRadians(180))
 
                     .build();
 
             Gate = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(13.000, 80.000),
-                                    new Pose(36.672, 77.814),
-                                    new Pose(13.000, 72.000)
+                                    new Pose(135.000, 85.000),
+                                    new Pose(112.920, 81.391),
+                                    new Pose(130.000, 78.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
                     .build();
 
             Shoot1 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(13.000, 72.000),
+                                    new Pose(130.000, 78.000),
 
-                                    new Pose(55.000, 89.000)
+                                    new Pose(89.000, 89.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(315))
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(220))
 
                     .build();
 
             Intake2 = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(55.000, 89.000),
-                                    new Pose(67.306, 51.652),
-                                    new Pose(13.000, 56.000)
+                                    new Pose(89.000, 89.000),
+                                    new Pose(85.641, 56.795),
+                                    new Pose(137.447, 61.224)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(0))
+                    ).setLinearHeadingInterpolation(Math.toRadians(220), Math.toRadians(180))
 
                     .build();
 
             Shoot2 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(13.000, 56.000),
+                                    new Pose(137.447, 61.224),
 
-                                    new Pose(55.000, 89.000)
+                                    new Pose(89.000, 89.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(315))
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(220))
 
                     .build();
 
             Intake3 = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(55.000, 89.000),
-                                    new Pose(71.554, 25.714),
-                                    new Pose(13.000, 32.646)
+                                    new Pose(89.000, 89.000),
+                                    new Pose(88.324, 31.304),
+                                    new Pose(137.000, 37.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(0))
+                    ).setLinearHeadingInterpolation(Math.toRadians(220), Math.toRadians(180))
 
                     .build();
 
             Shoot3 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(13.000, 32.646),
+                                    new Pose(137.000, 37.000),
 
-                                    new Pose(55.000, 89.000)
+                                    new Pose(89.000, 89.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(315))
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(220))
 
                     .build();
 
             leave = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(55.000, 89.000),
+                                    new Pose(89.000, 89.000),
 
-                                    new Pose(55.000, 64.000)
+                                    new Pose(89.000, 64.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(0))
+                    ).setLinearHeadingInterpolation(Math.toRadians(220), Math.toRadians(360))
 
                     .build();
         }
     }
+
 }

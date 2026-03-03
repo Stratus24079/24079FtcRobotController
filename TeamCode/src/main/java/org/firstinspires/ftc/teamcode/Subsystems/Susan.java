@@ -57,6 +57,8 @@ public class Susan {
     private FtcDashboard dash = FtcDashboard.getInstance();
     private List<Action> runningActions = new ArrayList<>();
 
+    public Launcher launcher;
+
     //TODO Adjust based on desired states
     public enum SusanMode {
         MANUAL,
@@ -70,8 +72,9 @@ public class Susan {
     public Susan.SusanMode susanMode = SusanMode.MANUAL;
 
     //Constructor
-    public Susan(LinearOpMode opmode) {
+    public Susan(LinearOpMode opmode, Launcher rpm) {
         myOpMode = opmode;
+        launcher = rpm;
     }
 
     public void init() {
@@ -221,12 +224,37 @@ public class Susan {
             } else {
                 ballKickers[2].kickerMode = BallKicker.KickerMode.KICKER_DOWN;
             }
+        }
 
-            /*if (myOpMode.gamepad2.a) {
+        else if(susanMode == SusanMode.SEQUENTIAL) {
+            myOpMode.telemetry.addData("kickerindex", kickerIndex);
+
+            double rpmError = launcher.revolutions_per_minute - launcher.measuredRPM;
+            //Math.abs(rpmError) < 30 &&
+            if(timer.seconds() > 0.15){
+                if(kickerIndex < 3) {
+                    ballKickers[kickerIndex].kickerMode = BallKicker.KickerMode.KICKER_UP;
+                }
+                kickerIndex++;
+                timer.reset();
+            }
+
+            if(kickerIndex > 3){
+                susanMode = SusanMode.MANUAL;
+                ballKickers[0].kickerMode = BallKicker.KickerMode.KICKER_DOWN;
+                ballKickers[1].kickerMode = BallKicker.KickerMode.KICKER_DOWN;
+                ballKickers[2].kickerMode = BallKicker.KickerMode.KICKER_DOWN;
+            }
+        }
+
+        if(myOpMode.gamepad2.x || myOpMode.gamepad2.y || myOpMode.gamepad2.b){
+            susanMode = SusanMode.MANUAL;
+        }
+
+        if (myOpMode.gamepad2.a) {
                 susanMode = SusanMode.SEQUENTIAL;
                 kickerIndex = 0;
-                timer.reset();
-            }*/
+            }
 
             if (myOpMode.gamepad1.x) {
                 innerMotor.setPower(INNER_MOTOR_SPEED);
@@ -241,12 +269,7 @@ public class Susan {
             } else if (myOpMode.gamepad2.dpad_left) {
                 innerMotor.setPower(0);
             }
-
-            if(myOpMode.gamepad2.a){
-                kickSequential();
-            }
         }
-    }
 
     //use roadrunner actions in TeleOp
     public void kickSequential() {

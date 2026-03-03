@@ -42,11 +42,13 @@ public class Launcher {
 
     public double FAR = 0.7;
     public double CLOSE = 1;
-    public double FARRPM = 6000;
+    public double FARRPM = 4500;
     public double CLOSERPM = 3200;
-    public double AUTO_CLOSE_RPM = 3300;
+    public double AUTO_CLOSE_RPM = 3330;
     public double AUTO_FAR_RPM = 6000;
+    public double measuredRPM;
 
+    public double MIN_TURRET_SPEED = 0.1;
     public double revolutions_per_minute = 5000;
     public static final double TICKS_PER_REVOLUTION = 28;
     double TICKS_PER_SECOND = revolutions_per_minute / 60 * TICKS_PER_REVOLUTION;
@@ -270,7 +272,7 @@ public class Launcher {
             hoodMode = HoodMode.AUTO;
         }
 
-        double measuredRPM = spin1.getVelocity() * 60 / TICKS_PER_REVOLUTION;
+        measuredRPM = spin1.getVelocity() * 60 / TICKS_PER_REVOLUTION;
         double measuredRPM2 = spin2.getVelocity() * 60 / TICKS_PER_REVOLUTION;
         myOpMode.telemetry.addData("turret mode", turretMode);
         //myOpMode.telemetry.addData("turret pos", turret.getDirection().ordinal());
@@ -325,6 +327,101 @@ public class Launcher {
         };
     }
 
+    public Action autoAim() {
+        return new Action() {
+            private boolean initialized = false;
+            ElapsedTime timer = new ElapsedTime();
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    timer.reset();
+                    initialized = true;
+                }
+
+                result = limelight.getLatestResult();
+                if (result.isValid()) {
+
+                /*
+                Pose3D botpose = result.getBotpose();
+                double captureLatency = result.getCaptureLatency();
+                double targetingLatency = result.getTargetingLatency();
+                double parseLatency = result.getParseLatency();
+
+                myOpMode.telemetry.addData("txnc", result.getTxNC());
+                myOpMode.telemetry.addData("ty", result.getTy());
+                myOpMode.telemetry.addData("tync", result.getTyNC());
+
+                myOpMode.telemetry.addData("Botpose", botpose.toString());
+                */
+
+                    myOpMode.telemetry.addData("tx", result.getTx());
+
+                    // Access fiducial results
+                    fiducialResults = result.getFiducialResults();
+                    for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                        distance = -fr.getCameraPoseTargetSpace().getPosition().z;
+                        myOpMode.telemetry.addData("Distance", distance);
+                        //myOpMode.telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
+                    }
+
+                } else {
+                    myOpMode.telemetry.addData("Limelight", "No data available");
+                }
+
+                double turretError = abs(result.getTx());
+                double turretPower = turretPID.calculate(0, result.getTx());
+                myOpMode.telemetry.addData("turretPower", turretPower);
+
+                if (turretError > 0.3) {
+                    turret.setPower(-turretPower);
+                }
+
+                return turretError > 0.3 && timer.seconds() < 1;
+            }
+        };
+    }
+
+    public Action switchRed() {
+        return new Action() {
+            private boolean initialized = false;
+
+            ElapsedTime timer = new ElapsedTime();
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    timer.reset();
+                    initialized = true;
+                }
+
+                limelight.pipelineSwitch(4);
+
+                return timer.seconds() < 0.2;
+            }
+        };
+    }
+
+    public Action switchBlue() {
+        return new Action() {
+            private boolean initialized = false;
+
+            ElapsedTime timer = new ElapsedTime();
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    timer.reset();
+                    initialized = true;
+                }
+
+                limelight.pipelineSwitch(2);
+
+                return timer.seconds() < 0.2;
+            }
+        };
+    }
+
     public Action scanMotif() {
         return new Action() {
             private boolean initialized = false;
@@ -356,5 +453,8 @@ public class Launcher {
             }
         };
     }
+
+
+
 }
 

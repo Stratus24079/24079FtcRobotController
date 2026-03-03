@@ -27,7 +27,7 @@ public class RobotHardware{
         //drivetrain = new Drivetrain(myOpMode);
         intake = new Intake(myOpMode);
         launcher = new Launcher(myOpMode);
-        susan = new Susan(myOpMode);
+        susan = new Susan(myOpMode, launcher);
 
         //drivetrain.init();
         intake.init();

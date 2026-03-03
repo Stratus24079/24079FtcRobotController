@@ -54,9 +54,9 @@ public class BlueFar extends LinearOpMode {
 
                 kickOrder(0),
                 kickOrder(1),
-                kickOrder(2),
+                kickOrder(2)
 
-                new ParallelAction(
+                /*new ParallelAction(
                         pedroDriveOnPathChain(myPaths.intake1, 0.7, true),
                         robot.intake.intakeOn(),
                         robot.susan.innerIntakeOff(),
@@ -108,7 +108,7 @@ public class BlueFar extends LinearOpMode {
 
                 robot.susan.ballKickers[0].ballKickerUp(),
                 robot.susan.ballKickers[1].ballKickerUp(),
-                robot.susan.ballKickers[2].ballKickerUp()
+                robot.susan.ballKickers[2].ballKickerUp()*/
         ));
     }
 
