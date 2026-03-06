@@ -24,6 +24,9 @@ public class RedClose extends LinearOpMode {
     private Follower follower;
     private RobotHardware robot;
 
+    public double AUTO_CLOSE_RPM = 3330;
+    public double AUTO_FAR_RPM = 6000;
+
     int[] order1 = new int[]{2 ,1, 0};
     int[] order2 = new int[]{0, 1, 2};
 
@@ -49,7 +52,7 @@ public class RedClose extends LinearOpMode {
                 findOrder(),
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.ShootPreload, 1.2, true),
-                        robot.launcher.launcherOn("CLOSE"),
+                        robot.launcher.launcherOn(AUTO_CLOSE_RPM),
                         robot.susan.innerIntakeOn()
                 ),
 
@@ -65,7 +68,7 @@ public class RedClose extends LinearOpMode {
                 ),
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Shoot1, 1, true),
-                        robot.launcher.launcherOn("CLOSE"),
+                        robot.launcher.launcherOn(AUTO_CLOSE_RPM),
                         robot.susan.innerIntakeOn()
                 ),
                 robot.intake.intakeOff(),
@@ -82,7 +85,7 @@ public class RedClose extends LinearOpMode {
                 ),
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Shoot2, 1,true),
-                    robot.launcher.launcherOn("CLOSE"),
+                    robot.launcher.launcherOn(AUTO_CLOSE_RPM),
                     robot.susan.innerIntakeOn()
                 ),
                 robot.intake.intakeOff(),

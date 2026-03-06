@@ -24,6 +24,8 @@ public class BlueClose extends LinearOpMode {
     private Follower follower;
     private RobotHardware robot;
 
+    public double AUTO_CLOSE_RPM = 3250;
+    public double AUTO_FAR_RPM = 6000;
 
     int[] order1 = new int[]{2, 1, 0};
     int[] order2 = new int[]{0, 1, 2};
@@ -48,11 +50,15 @@ public class BlueClose extends LinearOpMode {
                 pedroDriveOnPathChain(myPaths.ReadMotif, 1, true),
                 robot.launcher.scanMotif(),
                 findOrder(),
+                robot.launcher.switchBlue(),
+
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.ShootPreload, 1, true),
-                        robot.launcher.launcherOn("CLOSE"),
+                        robot.launcher.launcherOn(AUTO_CLOSE_RPM - 150),
                         robot.susan.innerIntakeOn()
                 ),
+
+                robot.launcher.autoAim(),
 
                 kickOrder1(0),
                 kickOrder1(1),
@@ -72,9 +78,11 @@ public class BlueClose extends LinearOpMode {
 
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Shoot1, 1, true),
-                        robot.launcher.launcherOn("CLOSE"),
+                        robot.launcher.launcherOn(AUTO_CLOSE_RPM - 50),
                         robot.susan.innerIntakeOn()
                 ),
+
+                robot.launcher.autoAim(),
 
                 kickOrder1(0),
                 kickOrder1(1),
@@ -88,10 +96,12 @@ public class BlueClose extends LinearOpMode {
                 ),
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Shoot2, 1, true),
-                        robot.launcher.launcherOn("CLOSE"),
+                        robot.launcher.launcherOn(AUTO_CLOSE_RPM),
                         robot.susan.innerIntakeOn()
                 ),
                 robot.intake.intakeOff(),
+
+                robot.launcher.autoAim(),
 
                 kickOrder2(0),
                 kickOrder2(1),
@@ -105,10 +115,12 @@ public class BlueClose extends LinearOpMode {
                 ),
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.Shoot3, 1, true),
-                        robot.launcher.launcherOn("CLOSE"),
+                        robot.launcher.launcherOn(AUTO_CLOSE_RPM),
                         robot.susan.innerIntakeOn()
                 ),
                 robot.intake.intakeOff(),
+
+                robot.launcher.autoAim(),
 
                 kickOrder3(0),
                 kickOrder3(1),
@@ -290,7 +302,7 @@ public class BlueClose extends LinearOpMode {
                             new BezierLine(
                                     new Pose(55.000, 126.000),
 
-                                    new Pose(60.000, 94.000)
+                                    new Pose(60.000, 95.000)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(240), Math.toRadians(305))
 
@@ -298,9 +310,9 @@ public class BlueClose extends LinearOpMode {
 
             Intake1 = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(60.000, 94.000),
+                                    new Pose(60.000, 95.000),
                                     new Pose(73.119, 82.509),
-                                    new Pose(13.000, 80.000)
+                                    new Pose(17.000, 80.000)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(305), Math.toRadians(0))
 
@@ -308,9 +320,9 @@ public class BlueClose extends LinearOpMode {
 
             Gate = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(13.000, 80.000),
-                                    new Pose(36.672, 77.814),
-                                    new Pose(13.000, 72.000)
+                                    new Pose(17.000, 80.000),
+                                    new Pose(27.728, 78.037),
+                                    new Pose(17.000, 77.000)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
@@ -318,7 +330,7 @@ public class BlueClose extends LinearOpMode {
 
             Shoot1 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(13.000, 72.000),
+                                    new Pose(17.000, 77.000),
 
                                     new Pose(55.000, 89.000)
                             )
@@ -330,7 +342,7 @@ public class BlueClose extends LinearOpMode {
                             new BezierCurve(
                                     new Pose(55.000, 89.000),
                                     new Pose(67.306, 51.652),
-                                    new Pose(13.000, 56.000)
+                                    new Pose(9.000, 56.000)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(0))
 
@@ -338,7 +350,7 @@ public class BlueClose extends LinearOpMode {
 
             Shoot2 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(13.000, 56.000),
+                                    new Pose(9.000, 56.000),
 
                                     new Pose(55.000, 89.000)
                             )
@@ -350,7 +362,7 @@ public class BlueClose extends LinearOpMode {
                             new BezierCurve(
                                     new Pose(55.000, 89.000),
                                     new Pose(71.554, 25.714),
-                                    new Pose(13.000, 32.646)
+                                    new Pose(9.385, 32.199)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(0))
 
@@ -358,7 +370,7 @@ public class BlueClose extends LinearOpMode {
 
             Shoot3 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(13.000, 32.646),
+                                    new Pose(9.385, 32.199),
 
                                     new Pose(55.000, 89.000)
                             )
@@ -372,7 +384,7 @@ public class BlueClose extends LinearOpMode {
 
                                     new Pose(55.000, 64.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(0))
+                    ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(180))
 
                     .build();
         }

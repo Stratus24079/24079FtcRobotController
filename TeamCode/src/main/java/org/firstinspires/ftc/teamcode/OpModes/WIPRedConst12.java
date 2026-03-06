@@ -20,12 +20,13 @@ import org.firstinspires.ftc.teamcode.Subsystems.RobotHardware;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous
-public class RedClose12 extends LinearOpMode {
+public class WIPRedConst12 extends LinearOpMode {
     private Follower follower;
     private RobotHardware robot;
 
-    public double AUTO_CLOSE_RPM = 3280;
+    public double AUTO_CLOSE_RPM = 3330;
     public double AUTO_FAR_RPM = 6000;
+
 
     int[] order1 = new int[]{2, 1, 0};
     int[] order2 = new int[]{0, 1, 2};
@@ -47,91 +48,98 @@ public class RedClose12 extends LinearOpMode {
         if (isStopRequested()) return;
 
         Actions.runBlocking(new SequentialAction(
-                pedroDriveOnPathChain(myPaths.ReadMotif, 1, true),
-                robot.launcher.scanMotif(),
-                findOrder(),
-                robot.launcher.switchRed(),
-                new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.ShootPreload, 1, true),
-                        robot.launcher.launcherOn(AUTO_CLOSE_RPM),
-                        robot.susan.innerIntakeOn()
-                ),
+                        pedroDriveOnPathChain(myPaths.ReadMotif, 1, true),
+                        robot.launcher.scanMotif(),
+                        findOrder(),
+                        robot.launcher.switchRed(),
 
-                robot.launcher.autoAim(),
+                        new ParallelAction(
 
-                kickOrder1(0),
-                kickOrder1(1),
-                kickOrder1(2),
+                                robot.launcher.constAutoAim(),
 
-                new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.Intake1, 0.7, true),
-                        robot.intake.intakeOn(),
-                        robot.susan.innerIntakeOff(),
-                        robot.launcher.launcherOff()
+                                new SequentialAction(
+                                        new ParallelAction(
+                                                pedroDriveOnPathChain(myPaths.ShootPreload, 1, true),
 
-                ),
-                new SequentialAction(
-                        pedroDriveOnPathChain(myPaths.Gate, 0.7, true),
-                        robot.intake.intakeOff()
-                ),
+                                                robot.launcher.launcherOn(AUTO_CLOSE_RPM),
+                                                robot.susan.innerIntakeOn()
+                                        ),
 
-                new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.Shoot1, 1, true),
-                        robot.launcher.launcherOn(AUTO_CLOSE_RPM),
-                        robot.susan.innerIntakeOn()
-                ),
 
-                robot.launcher.autoAim(),
+                                        kickOrder1(0),
+                                        kickOrder1(1),
+                                        kickOrder1(2),
 
-                kickOrder1(0),
-                kickOrder1(1),
-                kickOrder1(2),
+                                        new ParallelAction(
+                                                pedroDriveOnPathChain(myPaths.Intake1, 0.7, true),
+                                                robot.intake.intakeOn(),
+                                                robot.susan.innerIntakeOff(),
+                                                robot.launcher.launcherOff()
 
-                new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.Intake2, 0.7, true),
-                        robot.intake.intakeOn(),
-                        robot.susan.innerIntakeOff(),
-                        robot.launcher.launcherOff()
-                ),
-                new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.Shoot2, 1, true),
-                        robot.launcher.launcherOn(AUTO_CLOSE_RPM),
-                        robot.susan.innerIntakeOn()
-                ),
-                robot.intake.intakeOff(),
+                                        ),
+                                        new SequentialAction(
+                                                pedroDriveOnPathChain(myPaths.Gate, 0.7, true),
+                                                robot.intake.intakeOff()
+                                        ),
 
-                robot.launcher.autoAim(),
+                                        new ParallelAction(
+                                                pedroDriveOnPathChain(myPaths.Shoot1, 1, true),
+                                                robot.launcher.launcherOn(AUTO_CLOSE_RPM),
+                                                robot.susan.innerIntakeOn()
+                                        ),
 
-                kickOrder2(0),
-                kickOrder2(1),
-                kickOrder2(2),
 
-                new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.Intake3, 0.7, true),
-                        robot.intake.intakeOn(),
-                        robot.susan.innerIntakeOff(),
-                        robot.launcher.launcherOff()
-                ),
-                new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.Shoot3, 1, true),
-                        robot.launcher.launcherOn(AUTO_CLOSE_RPM),
-                        robot.susan.innerIntakeOn()
-                ),
-                robot.intake.intakeOff(),
+                                        kickOrder1(0),
+                                        kickOrder1(1),
+                                        kickOrder1(2),
 
-                robot.launcher.autoAim(),
+                                        new ParallelAction(
+                                                pedroDriveOnPathChain(myPaths.Intake2, 0.7, true),
+                                                robot.intake.intakeOn(),
+                                                robot.susan.innerIntakeOff(),
+                                                robot.launcher.launcherOff()
+                                        ),
+                                        new ParallelAction(
+                                                pedroDriveOnPathChain(myPaths.Shoot2, 1, true),
+                                                robot.launcher.launcherOn(AUTO_CLOSE_RPM),
+                                                robot.susan.innerIntakeOn()
+                                        ),
+                                        robot.intake.intakeOff(),
 
-                kickOrder3(0),
-                kickOrder3(1),
-                kickOrder3(2),
 
-                new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.leave, 1, true),
-                        robot.launcher.launcherOff(),
-                        robot.susan.innerIntakeOff()
+                                        kickOrder2(0),
+                                        kickOrder2(1),
+                                        kickOrder2(2),
+
+                                        new ParallelAction(
+                                                pedroDriveOnPathChain(myPaths.Intake3, 0.7, true),
+                                                robot.intake.intakeOn(),
+                                                robot.susan.innerIntakeOff(),
+                                                robot.launcher.launcherOff()
+                                        ),
+                                        new ParallelAction(
+                                                pedroDriveOnPathChain(myPaths.Shoot3, 1, true),
+                                                robot.launcher.launcherOn(AUTO_CLOSE_RPM),
+                                                robot.susan.innerIntakeOn()
+                                        ),
+                                        robot.intake.intakeOff(),
+
+
+                                        kickOrder3(0),
+                                        kickOrder3(1),
+                                        kickOrder3(2),
+
+                                        new ParallelAction(
+                                                pedroDriveOnPathChain(myPaths.leave, 1, true),
+                                                robot.launcher.launcherOff(),
+                                                robot.susan.innerIntakeOff()
+                                        )
+
+                                )
+                        )
+
                 )
-
-        ));
+        );
     }
 
     public Action fireInOrder1() {

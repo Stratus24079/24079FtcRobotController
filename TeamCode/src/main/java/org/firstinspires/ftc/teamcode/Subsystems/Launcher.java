@@ -4,6 +4,7 @@ import static java.lang.Math.abs;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -24,6 +25,7 @@ import org.firstinspires.ftc.teamcode.utility.PIDController;
 import java.util.ArrayList;
 import java.util.List;
 
+@Config
 public class Launcher {
     // pipeline
     // 0 = obelisk
@@ -44,15 +46,13 @@ public class Launcher {
     public double CLOSE = 1;
     public double FARRPM = 4500;
     public double CLOSERPM = 3200;
-    public double AUTO_CLOSE_RPM = 3330;
-    public double AUTO_FAR_RPM = 6000;
     public double measuredRPM;
 
-    public double MIN_TURRET_SPEED = 0.1;
+    public double MIN_TURRET_SPEED = 0.06;
     public double revolutions_per_minute = 5000;
     public static final double TICKS_PER_REVOLUTION = 28;
     double TICKS_PER_SECOND = revolutions_per_minute / 60 * TICKS_PER_REVOLUTION;
-    public static double turretKP = 0.01;
+    public static double turretKP = 0.015;
     public double turretKI = 0;
     public double turretKD = 0;
     public int id = 21;
@@ -113,6 +113,7 @@ public class Launcher {
         hood.setPosition(CLOSE);
 
         turret = myOpMode.hardwareMap.get(CRServo.class, "turret");
+        turret.setDirection(DcMotorSimple.Direction.REVERSE);
         turret.setPower(0);
 
         turretEncoder = myOpMode.hardwareMap.get(AnalogInput.class, "turretEncoder");
@@ -187,7 +188,8 @@ public class Launcher {
 
         //if(turretMode == TurretMode.MANUAL && !(totalUnwrappedDegrees > 420 && myOpMode.gamepad2.right_stick_x < 0 || totalUnwrappedDegrees < -470 && myOpMode.gamepad2.right_stick_x > 0)) {
         if(turretMode == TurretMode.MANUAL) {
-                turret.setPower(myOpMode.gamepad2.right_stick_x);
+                turret.setPower(-myOpMode.gamepad2.right_stick_x);
+                myOpMode.telemetry.addData("manualTurretPower", myOpMode.gamepad2.right_stick_x);
             } else if (turretMode == TurretMode.AUTO) {
                 if(Math.abs(myOpMode.gamepad2.right_stick_x) > 0.2){
                     turretMode = TurretMode.MANUAL;
@@ -222,12 +224,24 @@ public class Launcher {
                     myOpMode.telemetry.addData("Limelight", "No data available");
                 }
 
-                double turretError = abs(result.getTx());
+                double turretError = Math.abs(result.getTx());
                 double turretPower = turretPID.calculate(0, result.getTx());
-                myOpMode.telemetry.addData("turretPower", turretPower);
 
                 if (turretError > 0.5) {
-                        turret.setPower(-turretPower);
+                    /*
+                    if(Math.abs(turretPower)<MIN_TURRET_SPEED) {
+                        if(turretPower<0){
+                            turretPower = -MIN_TURRET_SPEED;
+                        }else{
+                            turretPower = MIN_TURRET_SPEED;
+                        }
+                    }
+
+                     */
+                    myOpMode.telemetry.addData("turretPower", turretPower);
+
+                    turret.setPower(turretPower);
+                    //turret.setPower(Math.signum(turretPower) * Math.max(Math.abs(turretPower), MIN_TURRET_SPEED));
                 }
 
             /*double turretPower = turretPID.calculate(0, turretEncoder.getVoltage() * 10);
@@ -285,7 +299,7 @@ public class Launcher {
         myOpMode.telemetry.addData("hoodPosition", hood.getPosition());
     }
 
-    public Action launcherOn(String loc) {
+    public Action launcherOn(double rpm) {
         return new Action() {
             private boolean initialized = false;
             ElapsedTime timer = new ElapsedTime();
@@ -293,7 +307,7 @@ public class Launcher {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    TICKS_PER_SECOND = ((loc.equals("CLOSE") ? AUTO_CLOSE_RPM : AUTO_FAR_RPM) / 60) * TICKS_PER_REVOLUTION;
+                    TICKS_PER_SECOND = (rpm / 60) * TICKS_PER_REVOLUTION;
                     spin1.setVelocity(TICKS_PER_SECOND);
                     spin2.setVelocity(TICKS_PER_SECOND);
                     initialized = true;
@@ -327,6 +341,25 @@ public class Launcher {
         };
     }
 
+    public Action farHood() {
+        return new Action() {
+            private boolean initialized = false;
+            ElapsedTime timer = new ElapsedTime();
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    timer.reset();
+                    initialized = true;
+                }
+
+                hood.setPosition(FAR);
+
+                return timer.seconds() < 0.3;
+            }
+        };
+    }
+
     public Action autoAim() {
         return new Action() {
             private boolean initialized = false;
@@ -340,6 +373,8 @@ public class Launcher {
                 }
 
                 result = limelight.getLatestResult();
+
+                double turretError = abs(result.getTx());
                 if (result.isValid()) {
 
                 /*
@@ -365,19 +400,76 @@ public class Launcher {
                         //myOpMode.telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
                     }
 
+
+                    double turretPower = turretPID.calculate(0, result.getTx());
+                    myOpMode.telemetry.addData("turretPower", turretPower);
+
+                    if (turretError > 0.3) {
+                        turret.setPower(turretPower);
+                    }
+
                 } else {
-                    myOpMode.telemetry.addData("Limelight", "No data available");
+                   turretError = 0.5;
                 }
+
+                return turretError > 0.3 && timer.seconds() < 0.5;
+            }
+        };
+    }
+
+    public Action constAutoAim() {
+        return new Action() {
+            private boolean initialized = false;
+            ElapsedTime timer = new ElapsedTime();
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    timer.reset();
+                    initialized = true;
+                }
+
+                result = limelight.getLatestResult();
 
                 double turretError = abs(result.getTx());
-                double turretPower = turretPID.calculate(0, result.getTx());
-                myOpMode.telemetry.addData("turretPower", turretPower);
+                if (result.isValid()) {
 
-                if (turretError > 0.3) {
-                    turret.setPower(-turretPower);
+                /*
+                Pose3D botpose = result.getBotpose();
+                double captureLatency = result.getCaptureLatency();
+                double targetingLatency = result.getTargetingLatency();
+                double parseLatency = result.getParseLatency();
+
+                myOpMode.telemetry.addData("txnc", result.getTxNC());
+                myOpMode.telemetry.addData("ty", result.getTy());
+                myOpMode.telemetry.addData("tync", result.getTyNC());
+
+                myOpMode.telemetry.addData("Botpose", botpose.toString());
+                */
+
+                    myOpMode.telemetry.addData("tx", result.getTx());
+
+                    // Access fiducial results
+                    fiducialResults = result.getFiducialResults();
+                    for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                        distance = -fr.getCameraPoseTargetSpace().getPosition().z;
+                        myOpMode.telemetry.addData("Distance", distance);
+                        //myOpMode.telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
+                    }
+
+
+                    double turretPower = turretPID.calculate(0, result.getTx());
+                    myOpMode.telemetry.addData("turretPower", turretPower);
+
+                    if (turretError > 0.3) {
+                        turret.setPower(turretPower);
+                    }
+
+                } else {
+                    turret.setPower(0);
                 }
 
-                return turretError > 0.3 && timer.seconds() < 1;
+                return timer.seconds() < 30;
             }
         };
     }

@@ -25,6 +25,9 @@ public class BlueFar extends LinearOpMode {
     private Follower follower;
     private RobotHardware robot;
 
+    public double AUTO_CLOSE_RPM = 3280;
+    public double AUTO_FAR_RPM = 6000;
+
 
     int[] order = new int[]{2, 1, 0};
 
@@ -48,7 +51,7 @@ public class BlueFar extends LinearOpMode {
                 findOrder(),
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.shootPreload, 1, true),
-                        robot.launcher.launcherOn("FAR"),
+                        robot.launcher.launcherOn(AUTO_FAR_RPM),
                         robot.susan.innerIntakeOn()
                 ),
 
