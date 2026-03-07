@@ -24,6 +24,7 @@ public class TeleOp extends LinearOpMode {
     public static Pose startingPose;
     public double speedMultiplier = 0.75;
     public ElapsedTime loopTime;
+    public int pipeline;
 
     enum DriveMode{
         ROBOT_CENTRIC,
@@ -72,8 +73,10 @@ public class TeleOp extends LinearOpMode {
             } else if (gamepad1.dpad_left && robot.launcher.hoodMode != Launcher.HoodMode.TUNING) {
                // driveMode = DriveMode.BLUE_FIELD_CENTRIC;
                 robot.launcher.limelight.pipelineSwitch(2);
+                pipeline = 2;
             } else if (gamepad1.dpad_right && robot.launcher.hoodMode != Launcher.HoodMode.TUNING) {
                 robot.launcher.limelight.pipelineSwitch(4);
+                pipeline = 4;
                // driveMode = DriveMode.RED_FIELD_CENTRIC;
             }
 
@@ -108,6 +111,7 @@ public class TeleOp extends LinearOpMode {
                 speedMultiplier = 0.75;
             }
             telemetry.addData("Drive Mode: ", driveMode);
+            telemetry.addData("pipeline", pipeline);
             telemetry.update();
         }
     }

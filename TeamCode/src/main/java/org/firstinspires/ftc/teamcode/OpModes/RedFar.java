@@ -26,7 +26,7 @@ public class RedFar extends LinearOpMode {
     private RobotHardware robot;
 
     public double AUTO_CLOSE_RPM = 3280;
-    public double AUTO_FAR_RPM = 4400;
+    public double AUTO_FAR_RPM = 4375;
 
 
     int[] order = new int[]{2, 1, 0};
@@ -61,9 +61,9 @@ public class RedFar extends LinearOpMode {
                 robot.launcher.autoAim(),
 
                 kickOrder(0),
-                new SleepAction(0.5),
+                new SleepAction(0.7),
                 kickOrder(1),
-                new SleepAction(0.5),
+                new SleepAction(0.7),
                 kickOrder(2),
 
                 new ParallelAction(
@@ -72,7 +72,11 @@ public class RedFar extends LinearOpMode {
                 ),
 
                 new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.slam1, 0.7, true)
+                        pedroDriveOnPathChain(myPaths.slam1, 1, true)
+
+                ),
+                new ParallelAction(
+                        pedroDriveOnPathChainTime(myPaths.slam2, 1, true,2)
 
                 ),
 
@@ -85,91 +89,42 @@ public class RedFar extends LinearOpMode {
                 robot.launcher.autoAim(),
 
                 kickOrder(0),
-                new SleepAction(0.5),
+                new SleepAction(0.7),
                 kickOrder(1),
-                new SleepAction(0.5),
+                new SleepAction(0.7),
                 kickOrder(2),
 
                 new ParallelAction(
                         pedroDriveOnPathChainTime(myPaths.intake2, 0.7, true, 2),
-                        robot.intake.intakeOn(),
                         robot.susan.innerIntakeOff(),
                         robot.launcher.launcherOff()
+                ),
+
+                new ParallelAction(
+                        pedroDriveOnPathChainTime(myPaths.slam3, 1, true,2)
+
+                ),
+
+                new ParallelAction(
+                        pedroDriveOnPathChainTime(myPaths.slam4, 1, true,1)
+
                 ),
 
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.shoot2, 1, true),
                         robot.launcher.launcherOn(AUTO_FAR_RPM),
+                        robot.intake.intakeOff(),
                         robot.susan.innerIntakeOn()
                 ),
 
                 robot.launcher.autoAim(),
 
                 kickOrder(0),
-                new SleepAction(0.5),
+                new SleepAction(0.7),
                 kickOrder(1),
-                new SleepAction(0.5),
+                new SleepAction(0.7),
                 kickOrder(2),
 
-                new ParallelAction(
-                        pedroDriveOnPathChainTime(myPaths.intake3, 0.7, true, 2),
-                        robot.susan.innerIntakeOff(),
-                        robot.launcher.launcherOff()
-                ),
-
-                new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.shoot3, 1, true),
-                        robot.launcher.launcherOn(AUTO_FAR_RPM),
-                        robot.susan.innerIntakeOn()
-                ),
-
-                robot.launcher.autoAim(),
-
-                kickOrder(0),
-                new SleepAction(0.5),
-                kickOrder(1),
-                new SleepAction(0.5),
-                kickOrder(2),
-
-                new ParallelAction(
-                        pedroDriveOnPathChainTime(myPaths.intake4, 0.7, true, 2),
-                        robot.susan.innerIntakeOff(),
-                        robot.launcher.launcherOff()
-                ),
-
-                new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.shoot4, 1, true),
-                        robot.launcher.launcherOn(AUTO_FAR_RPM),
-                        robot.susan.innerIntakeOn()
-                ),
-
-                robot.launcher.autoAim(),
-
-                kickOrder(0),
-                new SleepAction(0.5),
-                kickOrder(1),
-                new SleepAction(0.5),
-                kickOrder(2),
-
-                new ParallelAction(
-                        pedroDriveOnPathChainTime(myPaths.intake5, 0.7, true,2),
-                        robot.susan.innerIntakeOff(),
-                        robot.launcher.launcherOff()
-                ),
-
-                new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.shoot5, 1, true),
-                        robot.launcher.launcherOn(AUTO_FAR_RPM),
-                        robot.susan.innerIntakeOn()
-                ),
-
-                robot.launcher.autoAim(),
-
-                kickOrder(0),
-                new SleepAction(0.5),
-                kickOrder(1),
-                new SleepAction(0.5),
-                kickOrder(2),
 
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.leave, 1, true),
@@ -289,19 +244,17 @@ public class RedFar extends LinearOpMode {
 
 
 
+
     public static class Paths {
         public PathChain shootPreload;
         public PathChain intake1;
         public PathChain slam1;
+        public PathChain slam2;
         public PathChain shoot1;
         public PathChain intake2;
+        public PathChain slam3;
+        public PathChain slam4;
         public PathChain shoot2;
-        public PathChain intake3;
-        public PathChain shoot3;
-        public PathChain intake4;
-        public PathChain shoot4;
-        public PathChain intake5;
-        public PathChain shoot5;
         public PathChain leave;
 
         public Paths(Follower follower) {
@@ -326,18 +279,28 @@ public class RedFar extends LinearOpMode {
                     .build();
 
             slam1 = follower.pathBuilder().addPath(
-                            new BezierCurve(
+                            new BezierLine(
                                     new Pose(133.000, 17.000),
-                                    new Pose(92.349, 16.099),
-                                    new Pose(138.000, 17.000)
+
+                                    new Pose(115.851, 16.658)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
 
                     .build();
 
+            slam2 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(115.851, 16.658),
+
+                                    new Pose(138.000, 14.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(160))
+
+                    .build();
+
             shoot1 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(138.000, 17.000),
+                                    new Pose(138.000, 14.000),
 
                                     new Pose(85.000, 20.000)
                             )
@@ -351,71 +314,31 @@ public class RedFar extends LinearOpMode {
 
                                     new Pose(136.000, 10.000)
                             )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(160))
+
+                    .build();
+
+            slam3 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(136.000, 10.000),
+
+                                    new Pose(115.193, 14.696)
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(160))
+
+                    .build();
+
+            slam4 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(115.193, 14.696),
+
+                                    new Pose(136.000, 10.000)
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(160))
 
                     .build();
 
             shoot2 = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(136.000, 10.000),
-
-                                    new Pose(85.000, 20.000)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
-
-                    .build();
-
-            intake3 = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(85.000, 20.000),
-
-                                    new Pose(136.000, 10.000)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
-
-                    .build();
-
-            shoot3 = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(136.000, 10.000),
-
-                                    new Pose(85.000, 20.000)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
-
-                    .build();
-
-            intake4 = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(85.000, 20.000),
-
-                                    new Pose(136.000, 10.000)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
-
-                    .build();
-
-            shoot4 = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(136.000, 10.000),
-
-                                    new Pose(85.000, 20.000)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
-
-                    .build();
-
-            intake5 = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(85.000, 20.000),
-
-                                    new Pose(136.000, 10.000)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
-
-                    .build();
-
-            shoot5 = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(136.000, 10.000),
 

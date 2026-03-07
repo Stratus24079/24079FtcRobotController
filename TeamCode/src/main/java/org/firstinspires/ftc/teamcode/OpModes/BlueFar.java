@@ -15,6 +15,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Subsystems.RobotHardware;
@@ -26,14 +27,16 @@ public class BlueFar extends LinearOpMode {
     private RobotHardware robot;
 
     public double AUTO_CLOSE_RPM = 3280;
-    public double AUTO_FAR_RPM = 6000;
-
+    public double AUTO_FAR_RPM = 4300;
+    public Servo hood = null;
 
     int[] order = new int[]{2, 1, 0};
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Pose startPose = new Pose(85, 10, Math.toRadians(270));
+        hood.setPosition(0.7);
+
+        Pose startPose = new Pose(60, 10, Math.toRadians(0));
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
 
@@ -48,70 +51,89 @@ public class BlueFar extends LinearOpMode {
 
         Actions.runBlocking(new SequentialAction(
                 robot.launcher.scanMotif(),
-                findOrder(),
+                robot.launcher.switchBlue(),
+                //findOrder(),
+
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.shootPreload, 1, true),
+                        robot.launcher.farHood(),
                         robot.launcher.launcherOn(AUTO_FAR_RPM),
                         robot.susan.innerIntakeOn()
                 ),
 
-                kickOrder(0),
-                kickOrder(1),
-                kickOrder(2)
+                robot.launcher.autoAim(),
 
-                /*new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.intake1, 0.7, true),
-                        robot.intake.intakeOn(),
-                        robot.susan.innerIntakeOff(),
-                        robot.launcher.launcherOff()
+                kickOrder(0),
+                new SleepAction(0.7),
+                kickOrder(1),
+                new SleepAction(0.7),
+                kickOrder(2),
+
+                new ParallelAction(
+                        pedroDriveOnPathChainTime(myPaths.intake1, 1, true, 2),
+                        robot.intake.intakeOn()
+                ),
+
+                new ParallelAction(
+                        pedroDriveOnPathChain(myPaths.slam1, 1, true)
+
+                ),
+                new ParallelAction(
+                        pedroDriveOnPathChainTime(myPaths.slam2, 1, true,2)
 
                 ),
 
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.shoot1, 1, true),
-                        robot.launcher.launcherOn("FAR"),
+                        robot.launcher.launcherOn(AUTO_FAR_RPM),
                         robot.susan.innerIntakeOn()
                 ),
 
-                robot.susan.ballKickers[0].ballKickerUp(),
-                robot.susan.ballKickers[1].ballKickerUp(),
-                robot.susan.ballKickers[2].ballKickerUp(),
+                robot.launcher.autoAim(),
+
+                kickOrder(0),
+                new SleepAction(0.7),
+                kickOrder(1),
+                new SleepAction(0.7),
+                kickOrder(2),
 
                 new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.intake2, 0.7, true),
-                        robot.intake.intakeOn(),
+                        pedroDriveOnPathChainTime(myPaths.intake2, 0.7, true, 2),
                         robot.susan.innerIntakeOff(),
                         robot.launcher.launcherOff()
+                ),
+
+                new ParallelAction(
+                        pedroDriveOnPathChainTime(myPaths.slam3, 1, true,2)
+
+                ),
+
+                new ParallelAction(
+                        pedroDriveOnPathChainTime(myPaths.slam4, 1, true,1)
+
                 ),
 
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.shoot2, 1, true),
-                        robot.launcher.launcherOn("FAR"),
+                        robot.launcher.launcherOn(AUTO_FAR_RPM),
+                        robot.intake.intakeOff(),
                         robot.susan.innerIntakeOn()
                 ),
-                robot.intake.intakeOff(),
 
-                robot.susan.ballKickers[0].ballKickerUp(),
-                robot.susan.ballKickers[1].ballKickerUp(),
-                robot.susan.ballKickers[2].ballKickerUp(),
+                robot.launcher.autoAim(),
+
+                kickOrder(0),
+                new SleepAction(0.7),
+                kickOrder(1),
+                new SleepAction(0.7),
+                kickOrder(2),
+
 
                 new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.intake3, 0.7, true),
-                        robot.intake.intakeOn(),
+                        pedroDriveOnPathChain(myPaths.leave, 1, true),
                         robot.susan.innerIntakeOff(),
                         robot.launcher.launcherOff()
-                ),
-
-                new ParallelAction(
-                        pedroDriveOnPathChain(myPaths.shoot3, 1, true),
-                        robot.launcher.launcherOn("FAR"),
-                        robot.susan.innerIntakeOn()
-                ),
-                robot.intake.intakeOff(),
-
-                robot.susan.ballKickers[0].ballKickerUp(),
-                robot.susan.ballKickers[1].ballKickerUp(),
-                robot.susan.ballKickers[2].ballKickerUp()*/
+                )
         ));
     }
 
@@ -197,87 +219,148 @@ public class BlueFar extends LinearOpMode {
         };
     }
 
+    private Action pedroDriveOnPathChainTime(PathChain targetPathChain, double maxPower, boolean holdPos, double time) {
+        return new Action() {
+            private boolean initialized = false;
+            ElapsedTime pathTimer = new ElapsedTime();
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    initialized = true;
+                    pathTimer.reset();
+                    follower.followPath(targetPathChain, maxPower, holdPos);
+                }
+
+                follower.update();
+
+                telemetry.addData("x", follower.getPose().getX());
+                telemetry.addData("y", follower.getPose().getY());
+                telemetry.addData("heading", follower.getPose().getHeading());
+
+                telemetry.update();
+
+                return follower.isBusy() && pathTimer.seconds() < time;
+            }
+        };
+    }
+
+
 
 
     public static class Paths {
         public PathChain shootPreload;
         public PathChain intake1;
+        public PathChain slam1;
+        public PathChain slam2;
         public PathChain shoot1;
         public PathChain intake2;
+        public PathChain slam3;
+        public PathChain slam4;
         public PathChain shoot2;
-        public PathChain intake3;
-        public PathChain shoot3;
+        public PathChain leave;
 
         public Paths(Follower follower) {
             shootPreload = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(85.000, 10.000),
+                                    new Pose(60.000, 10.000),
 
-                                    new Pose(85.000, 15.000)
+                                    new Pose(60.000, 20.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(270))
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
                     .build();
 
             intake1 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(85.000, 15.000),
+                                    new Pose(60.000, 20.000),
 
-                                    new Pose(135.000, 15.000)
+                                    new Pose(9.571, 15.882)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(180))
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
+
+                    .build();
+
+            slam1 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(9.571, 15.882),
+
+                                    new Pose(32.224, 14.870)
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
+
+                    .build();
+
+            slam2 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(32.224, 14.870),
+
+                                    new Pose(8.534, 10.870)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(20))
 
                     .build();
 
             shoot1 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(135.000, 15.000),
+                                    new Pose(8.534, 10.870),
 
-                                    new Pose(85.000, 15.000)
+                                    new Pose(60.000, 20.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(270))
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
 
                     .build();
 
             intake2 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(85.000, 15.000),
+                                    new Pose(60.000, 20.000),
 
-                                    new Pose(135.000, 15.000)
+                                    new Pose(9.441, 14.025)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(180))
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(20))
+
+                    .build();
+
+            slam3 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(9.441, 14.025),
+
+                                    new Pose(32.460, 12.683)
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(20))
+
+                    .build();
+
+            slam4 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(32.460, 12.683),
+
+                                    new Pose(9.888, 13.801)
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(20))
 
                     .build();
 
             shoot2 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(135.000, 15.000),
+                                    new Pose(9.888, 13.801),
 
-                                    new Pose(85.000, 15.000)
+                                    new Pose(60.000, 20.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(270))
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
 
                     .build();
 
-            intake3 = follower.pathBuilder().addPath(
+            leave = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(85.000, 15.000),
+                                    new Pose(60.000, 20.000),
 
-                                    new Pose(135.000, 15.000)
+                                    new Pose(60.000, 35.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(180))
-
-                    .build();
-
-            shoot3 = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(135.000, 15.000),
-
-                                    new Pose(85.000, 15.000)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(270))
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
 
                     .build();
         }
     }
+
 }

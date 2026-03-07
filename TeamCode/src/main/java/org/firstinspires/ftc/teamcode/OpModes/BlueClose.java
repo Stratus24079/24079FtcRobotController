@@ -50,10 +50,10 @@ public class BlueClose extends LinearOpMode {
                 pedroDriveOnPathChain(myPaths.ReadMotif, 1, true),
                 robot.launcher.scanMotif(),
                 findOrder(),
-                robot.launcher.switchBlue(),
 
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.ShootPreload, 1, true),
+                        robot.launcher.switchBlue(),
                         robot.launcher.launcherOn(AUTO_CLOSE_RPM - 150),
                         robot.susan.innerIntakeOn()
                 ),
@@ -275,6 +275,7 @@ public class BlueClose extends LinearOpMode {
     }
 
 
+
     public static class Paths {
         public PathChain ReadMotif;
         public PathChain ShootPreload;
@@ -362,7 +363,7 @@ public class BlueClose extends LinearOpMode {
                             new BezierCurve(
                                     new Pose(55.000, 89.000),
                                     new Pose(71.554, 25.714),
-                                    new Pose(9.385, 32.199)
+                                    new Pose(8.938, 34.435)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(315), Math.toRadians(0))
 
@@ -370,7 +371,7 @@ public class BlueClose extends LinearOpMode {
 
             Shoot3 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(9.385, 32.199),
+                                    new Pose(8.938, 34.435),
 
                                     new Pose(55.000, 89.000)
                             )
@@ -389,4 +390,5 @@ public class BlueClose extends LinearOpMode {
                     .build();
         }
     }
+
 }

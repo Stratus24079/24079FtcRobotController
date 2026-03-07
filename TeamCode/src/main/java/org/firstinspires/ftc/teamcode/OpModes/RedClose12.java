@@ -50,9 +50,10 @@ public class RedClose12 extends LinearOpMode {
                 pedroDriveOnPathChain(myPaths.ReadMotif, 1, true),
                 robot.launcher.scanMotif(),
                 findOrder(),
-                robot.launcher.switchRed(),
+
                 new ParallelAction(
                         pedroDriveOnPathChain(myPaths.ShootPreload, 1, true),
+                        robot.launcher.switchRed(),
                         robot.launcher.launcherOn(AUTO_CLOSE_RPM),
                         robot.susan.innerIntakeOn()
                 ),
@@ -313,8 +314,38 @@ public class RedClose12 extends LinearOpMode {
         };
     }
 
+    private Action pedroDriveOnPathChainTime(PathChain targetPathChain, double maxPower, boolean holdPos, double time) {
+        return new Action() {
+            private boolean initialized = false;
+            ElapsedTime pathTimer = new ElapsedTime();
 
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    initialized = true;
+                    pathTimer.reset();
+                    follower.followPath(targetPathChain, maxPower, holdPos);
+                }
 
+                follower.update();
+
+                telemetry.addData("x", follower.getPose().getX());
+                telemetry.addData("y", follower.getPose().getY());
+                telemetry.addData("heading", follower.getPose().getHeading());
+                telemetry.addData("order1", order1[0]);
+                telemetry.addData("order1", order1[1]);
+                telemetry.addData("order1", order1[2]);
+
+                telemetry.addData("order2", order2[0]);
+                telemetry.addData("order2", order2[1]);
+                telemetry.addData("order2", order2[2]);
+
+                telemetry.update();
+
+                return follower.isBusy() && pathTimer.seconds() < time;
+            }
+        };
+    }
 
     public static class Paths {
         public PathChain ReadMotif;
@@ -402,8 +433,8 @@ public class RedClose12 extends LinearOpMode {
             Intake3 = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(89.000, 89.000),
-                                    new Pose(84.096, 31.055),
-                                    new Pose(136.254, 37.995)
+                                    new Pose(85.214, 25.689),
+                                    new Pose(135.807, 37.324)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
 
@@ -411,7 +442,7 @@ public class RedClose12 extends LinearOpMode {
 
             Shoot3 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(136.254, 37.995),
+                                    new Pose(135.807, 37.324),
 
                                     new Pose(89.000, 89.000)
                             )
@@ -430,6 +461,5 @@ public class RedClose12 extends LinearOpMode {
                     .build();
         }
     }
-
 
 }

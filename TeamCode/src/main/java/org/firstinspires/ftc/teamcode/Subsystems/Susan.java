@@ -230,8 +230,7 @@ public class Susan {
             myOpMode.telemetry.addData("kickerindex", kickerIndex);
 
             double rpmError = launcher.revolutions_per_minute - launcher.measuredRPM;
-            //Math.abs(rpmError) < 30 &&
-            if(timer.seconds() > 0.15){
+            if(Math.abs(rpmError) < 50 && timer.seconds() > 0.2){
                 if(kickerIndex < 3) {
                     ballKickers[kickerIndex].kickerMode = BallKicker.KickerMode.KICKER_UP;
                 }
